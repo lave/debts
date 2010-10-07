@@ -1,0 +1,14 @@
+Name:                debts
+Version:             0.1
+Description:         Debt calculator
+License:             GPL
+Author:              Anton Lavrov
+Maintainer:          lavrov.anton@gmail.com
+Build-Type:          Simple
+Cabal-Version:       >=1.2
+
+Executable debts
+  Main-is:           Main.hs
+  Build-Depends:     base, haskell98, array
+  Hs-Source-Dirs:    src
+  Other-Modules:     Debt Fx Lexer Main Money Option Postprocessing Syntaxer Transaction Utils
