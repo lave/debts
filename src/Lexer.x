@@ -14,29 +14,35 @@ $quote = \"
 tokens :-
     $white+ ;
     "#".*   ;
-    ">"    { \s -> Arrow }
-    ":"     { \s -> Column }
-    ","     { \s -> Comma }
-    "_"     { \s -> Underscore }
-    "*"     { \s -> Asterisk }
-    "="     { \s -> Equal }
-    "-"     { \s -> Hyphen }
-    $alpha [$alpha $digit _\.]* { \s -> String s }
-    "-"? $digit+ (\. $digit+)? { \s -> Number (read s) }
-    $quote [^$quote]* $quote { \s -> String $ trimBoth s }
+    ">"     { \s -> TokenArrow }
+    ":"     { \s -> TokenColumn }
+    ","     { \s -> TokenComma }
+    "_"     { \s -> TokenUnderscore }
+    "*"     { \s -> TokenAsterisk }
+    "="     { \s -> TokenEqual }
+    "-"     { \s -> TokenHyphen }
+    "param" { \s -> TokenParameter }
+    "fx"    { \s -> TokenFx }
+    "group" { \s -> TokenGroup }
+    $alpha [$alpha $digit _\.]* { \s -> TokenString s }
+    "-"? $digit+ (\. $digit+)? { \s -> TokenNumber (read s) }
+    $quote [^$quote]* $quote { \s -> TokenString $ trimBoth s }
 
 {
 
 data Token =
-    Arrow
-    | Column
-    | Underscore
-    | Comma
-    | Asterisk
-    | Equal
-    | Hyphen
-    | String String
-    | Number Double
+    TokenArrow
+    | TokenColumn
+    | TokenUnderscore
+    | TokenComma
+    | TokenAsterisk
+    | TokenEqual
+    | TokenHyphen
+    | TokenParameter
+    | TokenFx
+    | TokenGroup
+    | TokenString String
+    | TokenNumber Double
     deriving Show
 }
 

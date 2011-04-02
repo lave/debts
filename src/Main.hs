@@ -25,7 +25,6 @@ main = do
         else do
             putStrLn ""
 
-    --let parsed = parseString s
     let parsed = parse tokens
     if (find (\s -> s == "-d") args /= Nothing)
         then do
@@ -34,21 +33,30 @@ main = do
         else do
             putStrLn ""
 
-    let result = process $ parsed
+    let result = process parsed
     printResults result
 
 
 
 
+process :: ([Option], [Group], [Fx], [RawTransaction]) -> ([Side], [Side])
 
-process (options, groups, fxs, transactions) = rounded
+process (options, groups, fxs, transactions) = (balance', expenses')
     where
-        rawResults = calc $ map unifyTransaction $ preprocessTransactions groups transactions
-        converted = applyIfOptionIsSet (convertSides fxs) (getStringOption "target.currency" options) rawResults
-        rounded = applyIfOptionIsSet (\b l -> roundSides (round b) l) (getNumberOption "round.to" options) converted
+        targetCurrency = getStringOption "target.currency" options
+        roundTo = getNumberOption "round.to" options
 
-        applyIfOptionIsSet f (Just x) a = f x a
-        applyIfOptionIsSet _ Nothing a = a
+        balance' = process' balance
+        expenses' = process' expenses
+
+        process' f = rounded
+            where
+                raw = calc f $ map unifyTransaction $ preprocessTransactions groups transactions
+                converted = applyIfOptionIsSet (convertSides fxs) targetCurrency raw
+                rounded = applyIfOptionIsSet (\b l -> roundSides (round b) l) roundTo converted
+
+                applyIfOptionIsSet f (Just x) a = f x a
+                applyIfOptionIsSet _ Nothing a = a
 
 
 convertSides fxs c sides = map (convertSide fxs c) sides
@@ -56,7 +64,10 @@ convertSides fxs c sides = map (convertSide fxs c) sides
         convertSide fxs c (Side n m) = Side n $ convert fxs c m
 
 
-printResults sides = do
+printResults (balance, expenses) = do
+    putStrLn $ show balance
+    putStrLn $ show expenses
+    let sides = balance
     sequence_ $ map printResult sides
     putStrLn "----------------"
     let sum = foldl Money.add (Moneys []) $ [m | (Side _ m) <- sides]
