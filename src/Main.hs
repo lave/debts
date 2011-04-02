@@ -49,7 +49,7 @@ process (options, groups, fxs, transactions) = (balance', expenses')
         balance' = process' balance
         expenses' = process' expenses
 
-        process' f = rounded
+        process' f = sortBy compareSides rounded
             where
                 raw = calc f $ map unifyTransaction $ preprocessTransactions groups transactions
                 converted = applyIfOptionIsSet (convertSides fxs) targetCurrency raw
@@ -57,6 +57,8 @@ process (options, groups, fxs, transactions) = (balance', expenses')
 
                 applyIfOptionIsSet f (Just x) a = f x a
                 applyIfOptionIsSet _ Nothing a = a
+                
+                compareSides (Side n1 _) (Side n2 _) = compare n1 n2
 
 
 convertSides fxs c sides = map (convertSide fxs c) sides
