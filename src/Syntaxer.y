@@ -17,15 +17,18 @@ import Transaction
 
 
 %token
-    '>' { Arrow }
-    ':'   { Column }
-    '_'   { Underscore }
-    ','   { Comma }
-    '*'   { Asterisk }
-    '='   { Equal }
-    '-'   { Hyphen }
-    string { String $$ }
-    number { Number $$ }
+    '>'     { TokenArrow }
+    ':'     { TokenColumn }
+    '_'     { TokenUnderscore }
+    ','     { TokenComma }
+    '*'     { TokenAsterisk }
+    '='     { TokenEqual }
+    '-'     { TokenHyphen }
+    param   { TokenParameter }
+    fx      { TokenFx }
+    group   { TokenGroup }
+    string  { TokenString $$ }
+    number  { TokenNumber $$ }
 
 %%
 
@@ -37,15 +40,15 @@ Options :: { [Option] }
     | Options Option { $2 : $1 }
 
 Option :: { Option }
-    : string '*' string { StringOption $1 $3 }
-    | string '*' number { NumberOption $1 $3 }
+    : param string '=' string { StringOption $2 $4 }
+    | param string '=' number { NumberOption $2 $4 }
 
 Groups :: { [Group] }
     : {- empty -} { [] }
     | Groups Group { $2 : $1 }
 
 Group :: { Group }
-    : string '=' GroupSides { Group $1 (reverse $3) }
+    : group string '=' GroupSides { Group $2 (reverse $4) }
 
 GroupSides :: { [RawSide] }
     : GroupSide { [$1] }
@@ -63,7 +66,7 @@ Fxs :: { [Fx] }
     | Fxs Fx { $2 : $1 }
 
 Fx :: { Fx }
-    : MoneyWithCurrency '=' MoneyWithCurrency { Fx $1 $3 }
+    : fx MoneyWithCurrency '=' MoneyWithCurrency { Fx $2 $4 }
 
 
 Transactions :: { [RawTransaction] }
@@ -71,7 +74,10 @@ Transactions :: { [RawTransaction] }
     | Transactions Transaction { $2 : $1 }
 
 Transaction :: { RawTransaction }
-    : TSides '>' MaybeMoneys '>' TSides ':' Comment { RawTransaction (reverse $1) (reverse $5) $3 $7 }
+    : TSides '>' MaybeMoneys '>' TSides { RawTransaction (reverse $1) (reverse $5) $3 "" }
+    | TSides '>' MaybeMoneys '>' TSides ':' Comment { RawTransaction (reverse $1) (reverse $5) $3 $7 }
+    | TSides '>' MaybeMoneys '>' '_' { RawTransaction (reverse $1) (reverse $1) $3 "" }
+    | TSides '>' MaybeMoneys '>' '_' ':' Comment { RawTransaction (reverse $1) (reverse $1) $3 $7 }
 
 Comment :: { String }
     : string { $1 }
