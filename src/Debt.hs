@@ -1,17 +1,21 @@
-module Debt ( calc )
+module Debt ( calc, balance, expenses )
 where
 
 import Money
 import Transaction
 
 
-calc :: [Transaction] -> [Side]
-calc transactions =
-    foldl calc' [] transactions
+calc :: ([Side] -> Transaction -> [Side]) -> [Transaction] -> [Side]
+calc f transactions =
+    foldl f [] transactions
 
-calc' :: [Side] -> Transaction -> [Side]
-calc' sides (Transaction payers beneficators _) =
+balance :: [Side] -> Transaction -> [Side]
+balance sides (Transaction payers beneficators _) =
     sides `addSides` payers `subSides` beneficators
+
+expenses :: [Side] -> Transaction -> [Side]
+expenses sides (Transaction _ beneficators _) =
+    sides `addSides` beneficators
 
 addSides s1 s2 = combineSides add s1 s2
 subSides s1 s2 = combineSides sub s1 s2
