@@ -21,7 +21,7 @@ add fxs fx
 convert :: [Fx] -> String -> Moneys -> Moneys
 convert fxs c (Moneys moneys) = Money.add (Moneys []) (Moneys (map (convert' fxs c) moneys))
     where
-        --convert' [] c m = m
+        convert' [] c m = m
         convert' ((Fx (Money q1 c1) (Money q2 c2)) : fxs) c0 m@(Money q c)
             | c == c0 = m
             | c1 == c && c2 == c0 = Money (q * q2 / q1) c0
