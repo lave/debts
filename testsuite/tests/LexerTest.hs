@@ -6,7 +6,9 @@ import Lexer
 
 
 parseTests = test [
-    "whitespaces" ~: [] ~=? alexScanTokens " a  ",
+    "whitespaces" ~:
+        [TokenString "a"]
+        ~=? alexScanTokens " a  "
     ]
 
 tests = test [parseTests]

@@ -43,6 +43,6 @@ data Token =
     | TokenGroup
     | TokenString String
     | TokenNumber Double
-    deriving Show
+    deriving (Eq, Show)
 }
 

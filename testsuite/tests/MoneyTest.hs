@@ -5,7 +5,7 @@ import Test.HUnit
 import Money
 
 
-addTests = test [
+addTests = TestList [
     "empty + empty" ~:
         (Moneys []) ~=?
         (add (Moneys []) (Moneys [])),
@@ -101,5 +101,5 @@ subTests = TestList [
 
 
 
-tests = test [eqTest, addTests, mulTests, subTests]
+tests = TestList [addTests, mulTests, subTests]
 

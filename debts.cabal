@@ -1,14 +1,21 @@
-Name:                debts
-Version:             0.1
-Description:         Debt calculator
-License:             GPL
-Author:              Anton Lavrov
-Maintainer:          lavrov.anton@gmail.com
-Build-Type:          Simple
-Cabal-Version:       >=1.2
+Name:               debts
+Version:            0.1
+Description:        Debt calculator
+License:            GPL
+Author:             Anton Lavrov
+Maintainer:         lavrov.anton@gmail.com
+Build-Type:         Simple
+Cabal-Version:      >=1.8
+Extra-source-files: testsute/test/RunTests.hs
 
 Executable debts
-  Main-is:           Main.hs
-  Build-Depends:     base, haskell98, array
-  Hs-Source-Dirs:    src
-  Other-Modules:     Debt Fx Lexer Main Money Option Postprocessing Syntaxer Transaction Utils
+  Main-is:          Main.hs
+  Build-Depends:    base, haskell98, array
+  Hs-Source-Dirs:   src
+  Other-Modules:    Debt Fx Lexer Main Money Option Postprocessing Syntaxer Transaction Utils
+
+Test-Suite unit-tests
+  Type:             exitcode-stdio-1.0
+  Hs-Source-Dirs:   testsuite/tests src dist/build/debts/debts-tmp
+  Build-Depends:    base, haskell98, array, HUnit
+  Main-Is:          RunTests.hs

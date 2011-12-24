@@ -1,4 +1,4 @@
-module Utils ( same, allSame, trimBoth )
+module Utils ( same, allSame, trimFirst, trimLast, trimBoth )
 where
 
 import List

@@ -44,7 +44,7 @@ calcTest = test [
          Side "eric" (Moneys [Sum (-10)]),
          Side "kyle" (Moneys [Sum (-20)]),
          Side "kenny" (Moneys [Sum 10])]
-        (calc [
+        (calc balance [
             Transaction
                 [Side "stan" (Moneys [Sum 30])] 
                 [Side "eric" (Moneys [Sum 10]),

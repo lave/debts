@@ -1,4 +1,5 @@
-module Debt ( calc, balance, expenses )
+module Debt (calc, balance, expenses,
+    addSides, subSides)
 where
 
 import Money

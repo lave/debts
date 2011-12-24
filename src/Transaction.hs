@@ -1,5 +1,6 @@
 module Transaction ( Group(..), RawSide(..), RawTransaction(..), Side(..), Transaction(..),
-    expandGroups, preprocessTransactions, unifyTransaction )
+    expandGroups, preprocessTransactions, unifyTransaction,
+    getName, processSidesOperations )
 
 where
 
