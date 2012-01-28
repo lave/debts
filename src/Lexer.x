@@ -26,7 +26,7 @@ tokens :-
     "group" { \s -> TokenGroup }
     $alpha [$alpha $digit _\.]* { \s -> TokenString s }
     "-"? $digit+ (\. $digit+)? { \s -> TokenNumber (read s) }
-    $quote [^$quote]* $quote { \s -> TokenString $ trimBoth s }
+    $quote [^$quote]* $quote { \s -> TokenString (trimBoth s) }
 
 {
 
