@@ -3,9 +3,12 @@ module Syntaxer ( parseString, parse )
 where
 
 import Lexer
-import Option
-import Money
+
+import Date
 import Fx
+import InputBuilder
+import Money
+import Option
 import Transaction
 
 }
@@ -29,26 +32,30 @@ import Transaction
     group   { TokenGroup }
     string  { TokenString $$ }
     number  { TokenNumber $$ }
+    date    { TokenDate }
 
 %%
 
-All :: { ([Option], [Group], [Fx], [RawTransaction]) }
-    : Options Groups Fxs Transactions { ($1, $2, $3, $4) }
+All :: { ([Builder]) }
+    : Builders { (reverse $1) }
 
-Options :: { [Option] }
+Builders :: { [Builder] }
     : {- empty -} { [] }
-    | Options Option { $2 : $1 }
+    | Builders Option { $2 : $1 }
+    | Builders Group { $2 : $1 }
+    | Builders Fx { $2 : $1 }
+    | Builders Date { $2 : $1 }
+    | Builders Transaction { $2 : $1 }
 
-Option :: { Option }
-    : param string '=' string { StringOption $2 $4 }
-    | param string '=' number { NumberOption $2 $4 }
+Option :: { Builder }
+    : param string '=' string
+        { ParameterBuilder $ StringOption $2 $4 }
+    | param string '=' number
+        { ParameterBuilder $ NumberOption $2 $4 }
 
-Groups :: { [Group] }
-    : {- empty -} { [] }
-    | Groups Group { $2 : $1 }
-
-Group :: { Group }
-    : group string '=' GroupSides { Group $2 (reverse $4) }
+Group :: { Builder }
+    : group string '=' GroupSides
+        { GroupBuilder $ Group $2 (reverse $4) }
 
 GroupSides :: { [RawSide] }
     : GroupSide { [$1] }
@@ -61,19 +68,19 @@ GroupSide :: { RawSide }
     | '=' GroupSide { RawSideOverride $2 }
 
 
-Fxs :: { [Fx] }
-    : {- empty -} { [] }
-    | Fxs Fx { $2 : $1 }
-
-Fx :: { Fx }
-    : fx MoneyWithCurrency '=' MoneyWithCurrency { Fx $2 $4 }
+Fx :: { Builder }
+    : fx MoneyWithCurrency '=' MoneyWithCurrency
+        { FxBuilder $ Fx $2 $4 }
 
 
-Transactions :: { [RawTransaction] }
-    : {- empty -} { [] }
-    | Transactions Transaction { $2 : $1 }
+Date :: { Builder }
+    : date string { DateBuilder $ Date $2 }
 
-Transaction :: { RawTransaction }
+
+Transaction :: { Builder }
+    : RawTransaction { TransactionBuilder $1 }
+
+RawTransaction :: { RawTransaction }
     : TSides '>' MaybeMoneys '>' TSides { RawTransaction (reverse $1) (reverse $5) $3 "" }
     | TSides '>' MaybeMoneys '>' TSides ':' Comment { RawTransaction (reverse $1) (reverse $5) $3 $7 }
     | TSides '>' MaybeMoneys '>' '_' { RawTransaction (reverse $1) (reverse $1) $3 "" }
@@ -130,7 +137,7 @@ SideRemove :: { RawSide }
 parseError :: [Token] -> a
 parseError token = error ("Parse error: " ++ show token)
 
-parseString :: String -> ([Option], [Group], [Fx], [RawTransaction])
+parseString :: String -> ([Builder])
 parseString = parse . alexScanTokens
 }
 

@@ -1,7 +1,8 @@
 module Option
 where
 
-data Option = StringOption String String 
+data Option =
+      StringOption String String 
     | NumberOption String Double
     deriving (Eq, Show)
 
