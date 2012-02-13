@@ -1,6 +1,7 @@
 module Main ( main )
 where
 
+import InputBuilder
 import Option
 import Money
 import Debt
@@ -33,15 +34,16 @@ main = do
         else do
             putStrLn ""
 
-    let result = process parsed
+    let input = buildInputData parsed
+    let result = process input
     printResults result
 
 
 
 
-process :: ([Option], [Group], [Fx], [RawTransaction]) -> ([Side], [Side])
+process :: Input -> ([Side], [Side])
 
-process (options, groups, fxs, transactions) = (balance', expenses')
+process (Input options groups fxs transactions) = (balance', expenses')
     where
         targetCurrency = getStringOption "target.currency" options
         roundTo = getNumberOption "round.to" options
@@ -51,7 +53,7 @@ process (options, groups, fxs, transactions) = (balance', expenses')
 
         process' f = sortBy compareSides rounded
             where
-                raw = calc f $ map unifyTransaction $ preprocessTransactions groups transactions
+                raw = calc f $ map (normalizeTransaction groups) transactions
                 converted = applyIfOptionIsSet (convertSides fxs) targetCurrency raw
                 rounded = applyIfOptionIsSet (\b l -> roundSides (round b) l) roundTo converted
 

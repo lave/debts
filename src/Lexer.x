@@ -24,23 +24,30 @@ tokens :-
     "param" { \s -> TokenParameter }
     "fx"    { \s -> TokenFx }
     "group" { \s -> TokenGroup }
+    "date"  { \s -> TokenDate }
     $alpha [$alpha $digit _\.]* { \s -> TokenString s }
     "-"? $digit+ (\. $digit+)? { \s -> TokenNumber (read s) }
-    $quote [^$quote]* $quote { \s -> TokenString $ trimBoth s }
+    $quote [^$quote]* $quote { \s -> TokenString (trimBoth s) }
 
 {
 
 data Token =
-    TokenArrow
+      TokenArrow
     | TokenColumn
     | TokenUnderscore
     | TokenComma
     | TokenAsterisk
     | TokenEqual
     | TokenHyphen
+    | TokenAt
+    | TokenOpenParenthesis
+    | TokenCloseParenthesis
+    | TokenOpenBracket
+    | TokenCloseBracket
     | TokenParameter
     | TokenFx
     | TokenGroup
+    | TokenDate
     | TokenString String
     | TokenNumber Double
     deriving (Eq, Show)
