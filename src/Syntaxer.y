@@ -2,12 +2,16 @@
 module Syntaxer ( parseString, parse )
 where
 
+import Maybe
+
 import Lexer
 import ParserMonad
 
-import Option
-import Money
+import Date
 import Fx
+import InputBuilder
+import Money
+import Option
 import Transaction
 
 }
@@ -26,33 +30,49 @@ import Transaction
     '*'     { TokenAsterisk }
     '='     { TokenEqual }
     '-'     { TokenHyphen }
+    '@'     { TokenAt }
+    '('     { TokenOpenParenthesis }
+    ')'     { TokenCloseParenthesis }
+    '['     { TokenOpenBracket }
+    ']'     { TokenCloseBracket }
     param   { TokenParameter }
     fx      { TokenFx }
     group   { TokenGroup }
     string  { TokenString $$ }
     number  { TokenNumber $$ }
+    date    { TokenDate }
 
 %monad {ParserError} {thenE} {returnE}
 
 %%
 
-All :: { ([Option], [Group], [Fx], [RawTransaction]) }
-    : Options Groups Fxs Transactions { ($1, $2, $3, $4) }
+All :: { ([Builder]) }
+    : Builders { (reverse $1) }
 
-Options :: { [Option] }
+Builders :: { [Builder] }
     : {- empty -} { [] }
-    | Options Option { $2 : $1 }
+    | Builders Builder { $2 : $1 }
 
-Option :: { Option }
-    : param string '=' string { StringOption $2 $4 }
-    | param string '=' number { NumberOption $2 $4 }
+Builder :: { Builder }
+    : ParameterBuilder { $1 }
+    | GroupBuilder { $1 }
+    | FxBuilder { $1 }
+    | DateBuilder { $1 }
+    | TransactionBuilder { $1 }
 
-Groups :: { [Group] }
-    : {- empty -} { [] }
-    | Groups Group { $2 : $1 }
 
-Group :: { Group }
-    : group string '=' GroupSides { Group $2 (reverse $4) }
+
+ParameterBuilder :: { Builder }
+    : param string '=' string
+        { ParameterBuilder $ StringOption $2 $4 }
+    | param string '=' number
+        { ParameterBuilder $ NumberOption $2 $4 }
+
+
+
+GroupBuilder :: { Builder }
+    : group string '=' GroupSides
+        { GroupBuilder $ Group $2 (reverse $4) }
 
 GroupSides :: { [RawSide] }
     : GroupSide { [$1] }
@@ -65,26 +85,57 @@ GroupSide :: { RawSide }
     | '=' GroupSide { RawSideOverride $2 }
 
 
-Fxs :: { [Fx] }
+
+FxBuilder :: { Builder }
+    : fx MoneyWithCurrency '=' MoneyWithCurrency
+        { FxBuilder $ Fx $2 $4 }
+
+
+
+DateBuilder :: { Builder }
+    : date { DateBuilder Nothing }
+    | date string { DateBuilder $ Just $ Date $2 }
+
+
+
+TransactionBuilder :: { Builder }
+    : TSides '>' MaybeMoneys '>' MaybeTSides TransactionAttributeBuilders CommentBuilder
+        { TransactionBuilder
+            (reverse $1)
+            (reverse $ fromMaybe $1 $5)
+            $3
+            ($6 ++ $7) }
+
+
+TransactionAttributeBuilders :: { [TransactionAttributeBuilder] }
     : {- empty -} { [] }
-    | Fxs Fx { $2 : $1 }
+    | TransactionAttributeBuilders TransactionAttributeBuilder { $2 : $1 }
 
-Fx :: { Fx }
-    : fx MoneyWithCurrency '=' MoneyWithCurrency { Fx $2 $4 }
+TransactionAttributeBuilder :: { TransactionAttributeBuilder }
+    : '@' string { ContragentBuilder $ Contragent $2 }
+    | '(' Categories ')' { CategoryBuilder $2 }
+    | '[' Tags ']' { TagsBuilder $2 }
 
-
-Transactions :: { [RawTransaction] }
+Categories :: { [Category] }
     : {- empty -} { [] }
-    | Transactions Transaction { $2 : $1 }
+    | Categories ',' Category { $3 : $1 }
 
-Transaction :: { RawTransaction }
-    : TSides '>' MaybeMoneys '>' TSides { RawTransaction (reverse $1) (reverse $5) $3 "" }
-    | TSides '>' MaybeMoneys '>' TSides ':' Comment { RawTransaction (reverse $1) (reverse $5) $3 $7 }
-    | TSides '>' MaybeMoneys '>' '_' { RawTransaction (reverse $1) (reverse $1) $3 "" }
-    | TSides '>' MaybeMoneys '>' '_' ':' Comment { RawTransaction (reverse $1) (reverse $1) $3 $7 }
+Category :: { Category }
+    : string { Category $1 }
 
-Comment :: { String }
-    : string { $1 }
+Tags :: { [Tag] }
+    : {- empty -} { [] }
+    | Tags ',' Tag { $3 : $1 }
+
+Tag :: { Tag }
+    : string { Tag $1 }
+
+
+CommentBuilder :: { [TransactionAttributeBuilder] }
+    : {- empty -} { [] }
+    | ':' string { [CommentBuilder $ Comment $2] }
+
+
 
 MaybeMoneys :: { Maybe Moneys }
     : '_' { Nothing }
@@ -106,6 +157,11 @@ MoneyWithoutCurrency :: { Money }
 
 MoneyWithCurrency :: { Money }
     : number string { Money $1 $2 }
+
+
+MaybeTSides :: { Maybe [RawSide] }
+    : '_' { Nothing }
+    | TSides { Just $1 }
 
 TSides :: { [RawSide] }
     : TSide { [$1] }
@@ -134,7 +190,7 @@ SideRemove :: { RawSide }
 parseError :: [Token] -> ParserError a
 parseError tokens = Error ("Parse error: " ++ show (head tokens))
 
-parseString :: String -> ParserError ([Option], [Group], [Fx], [RawTransaction])
+parseString :: String -> ParserError [Builder]
 parseString = parse . alexScanTokens
 }
 

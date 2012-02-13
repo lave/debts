@@ -2,15 +2,10 @@ module TransactionTest
 where
 
 import Test.HUnit
+
 import Money
 import Transaction
 
-
-getNameTest = test [
-    "raw side" ~: "stan" ~=? getName (RawSide "stan"),
-    "raw side with factor" ~: "stan" ~=? getName (RawSideWithFactor "stan" 1),
-    "raw side with money" ~: "stan" ~=? getName (RawSideWithMoney "stan" (Moneys [Sum 1]))
-    ]
 
 
 expandGropusTest = test [
@@ -32,13 +27,13 @@ expandGropusTest = test [
             ]
 
 
-processSidesOperationsTest = test [
+processSidesTest = test [
     "simple accumulating" ~:
         [RawSide "stan",
          RawSideWithFactor "eric" 2,
          RawSideWithMoney "kyle" (Moneys [Sum 10]),
          RawSide "kenny"] ~=?
-        (processSidesOperations
+        (processSides
             [RawSide "stan",
              RawSideWithFactor "eric" 2,
              RawSideWithMoney "kyle" (Moneys [Sum 10]),
@@ -46,7 +41,7 @@ processSidesOperationsTest = test [
     "removing" ~:
         [RawSide "stan",
          RawSideWithFactor "eric" 2] ~=?
-        (processSidesOperations
+        (processSides
             [RawSide "stan",
              RawSideWithFactor "eric" 2,
              RawSideWithMoney "kyle" (Moneys [Sum 10]),
@@ -56,7 +51,7 @@ processSidesOperationsTest = test [
         [RawSide "stan",
          RawSideWithFactor "eric" 2,
          RawSide "kyle"] ~=?
-        (processSidesOperations
+        (processSides
             [RawSide "stan",
              RawSideWithFactor "eric" 2,
              RawSideWithMoney "kyle" (Moneys [Sum 10]),
@@ -64,85 +59,85 @@ processSidesOperationsTest = test [
     ]
 
 
-unifyTests = test [
+normalizeSidesTest = test [
     "split equally" ~:
-        (Transaction
+        (   Moneys [Money 30 "RUR"],
             [Side "stan" (Moneys [Money 15 "RUR"]),
-             Side "kenny" (Moneys [Money 15 "RUR"])]
+             Side "kenny" (Moneys [Money 15 "RUR"])],
             [Side "stan" (Moneys [Money 10 "RUR"]),
              Side "eric" (Moneys [Money 10 "RUR"]),
              Side "kyle" (Moneys [Money 10 "RUR"])]
-            "beer") ~=?
-        (unifyTransaction (RawTransaction
+        ) ~=?
+        (normalizeSides
+            (Just (Moneys [Money 30 "RUR"]))
             [RawSide "stan", RawSide "kenny"]
             [RawSide "stan", RawSide "kyle", RawSide "eric"]
-            (Just (Moneys [Money 30 "RUR"]))
-            "beer")),
+        ),
 
     "split by factors" ~:
-        (Transaction
+        (   Moneys [Money 30 "RUR"],
             [Side "stan" (Moneys [Money 10 "RUR"]),
-             Side "kenny" (Moneys [Money 20 "RUR"])]
+             Side "kenny" (Moneys [Money 20 "RUR"])],
             [Side "stan" (Moneys [Money 5 "RUR"]),
              Side "eric" (Moneys [Money 15 "RUR"]),
              Side "kyle" (Moneys [Money 10 "RUR"])]
-            "beer") ~=?
-        (unifyTransaction (RawTransaction
+        ) ~=?
+        (normalizeSides
+            (Just (Moneys [Money 30 "RUR"]))
             [RawSide "stan", RawSideWithFactor "kenny" 2]
             [RawSide "stan", RawSideWithFactor "kyle" 2, RawSideWithFactor "eric" 3]
-            (Just (Moneys [Money 30 "RUR"]))
-            "beer")),
+        ),
 
     "split by moneys" ~:
-        (Transaction
+        (   Moneys [Money 30 "RUR"],
             [Side "stan" (Moneys [Money 10 "RUR"]),
-             Side "kenny" (Moneys [Money 20 "RUR"])]
+             Side "kenny" (Moneys [Money 20 "RUR"])],
             [Side "stan" (Moneys [Money 5 "RUR"]),
              Side "eric" (Moneys [Money 20 "RUR"]),
              Side "kyle" (Moneys [Money 5 "RUR"])]
-            "beer") ~=?
-        (unifyTransaction (RawTransaction
+        ) ~=?
+        (normalizeSides
+            Nothing
             [RawSideWithMoney "stan" (Moneys [Money 10 "RUR"]),
              RawSideWithMoney "kenny" (Moneys [Money 20 "RUR"])]
             [RawSideWithMoney "stan" (Moneys [Money 5 "RUR"]),
              RawSideWithMoney "kyle" (Moneys [Money 5 "RUR"]),
              RawSideWithMoney "eric" (Moneys [Money 20 "RUR"])]
-            Nothing
-            "beer")),
+        ),
 
 {-
     "split by moneys - different moneys 1" ~:
-        (unifyTransaction (RawTransaction
+        (normalizeSides
+            Nothing
             [RawSideWithMoney "stan" (Moneys [Money 10 "RUR"])]
             [RawSideWithMoney "eric" (Moneys [Money 20 "RUR"])]
-            Nothing
-            "beer")),
+        ),
 
     "split by moneys - different moneys 2" ~:
-        (unifyTransaction (RawTransaction
+        (normalizeSides
+            (Just (Moneys [Money 30 "RUR"]))
             [RawSideWithMoney "stan" (Moneys [Money 10 "RUR"])]
             [RawSide "eric"]
-            (Just (Moneys [Money 30 "RUR"]))
-            "beer")),
+        ),
 -}
 
     "split by factors and moneys" ~:
-        (Transaction
+        (   Moneys [Money 30 "RUR"],
             [Side "stan" (Moneys [Money 10 "RUR"]),
-             Side "kenny" (Moneys [Money 20 "RUR"])]
+             Side "kenny" (Moneys [Money 20 "RUR"])],
             [Side "stan" (Moneys [Money 5 "RUR"]),
              Side "eric" (Moneys [Money 15 "RUR"]),
              Side "kyle" (Moneys [Money 10 "RUR"])]
-            "beer") ~=?
-        (unifyTransaction (RawTransaction
+        ) ~=?
+        (normalizeSides
+            (Just (Moneys [Money 30 "RUR"]))
             [RawSide "stan",
              RawSideWithMoney "kenny" (Moneys [Money 20 "RUR"])]
             [RawSide "stan",
              RawSideWithFactor "kyle" 2,
              RawSideWithMoney "eric" (Moneys [Money 15 "RUR"])]
-            (Just (Moneys [Money 30 "RUR"]))
-            "beer"))
+        )
     ]
 
-tests = test [getNameTest, expandGropusTest, processSidesOperationsTest, unifyTests]
+tests = test [expandGropusTest, processSidesTest, normalizeSidesTest]
 
