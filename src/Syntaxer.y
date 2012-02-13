@@ -3,6 +3,8 @@ module Syntaxer ( parseString, parse )
 where
 
 import Lexer
+import ParserMonad
+
 import Option
 import Money
 import Fx
@@ -29,6 +31,8 @@ import Transaction
     group   { TokenGroup }
     string  { TokenString $$ }
     number  { TokenNumber $$ }
+
+%monad {ParserError} {thenE} {returnE}
 
 %%
 
@@ -127,10 +131,10 @@ SideRemove :: { RawSide }
     : '-' string { RawSideRemove $2 }
 
 {
-parseError :: [Token] -> a
-parseError token = error ("Parse error: " ++ show token)
+parseError :: [Token] -> ParserError a
+parseError tokens = Error ("Parse error: " ++ show (head tokens))
 
-parseString :: String -> ([Option], [Group], [Fx], [RawTransaction])
+parseString :: String -> ParserError ([Option], [Group], [Fx], [RawTransaction])
 parseString = parse . alexScanTokens
 }
 

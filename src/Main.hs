@@ -5,6 +5,7 @@ import Option
 import Money
 import Debt
 import Syntaxer
+import ParserMonad
 import Lexer
 import Transaction
 import Fx
@@ -25,7 +26,12 @@ main = do
         else do
             putStrLn ""
 
-    let parsed = parse tokens
+    case parse tokens of
+        Ok parsed -> process args parsed
+        Error s -> putStrLn ("Parse error:" ++ s)
+
+
+process args parsed = do
     if (find (\s -> s == "-d") args /= Nothing)
         then do
             putStrLn "Syntax tree:"
@@ -33,15 +39,15 @@ main = do
         else do
             putStrLn ""
 
-    let result = process parsed
+    let result = process' parsed
     printResults result
 
 
 
 
-process :: ([Option], [Group], [Fx], [RawTransaction]) -> ([Side], [Side])
+process' :: ([Option], [Group], [Fx], [RawTransaction]) -> ([Side], [Side])
 
-process (options, groups, fxs, transactions) = (balance', expenses')
+process' (options, groups, fxs, transactions) = (balance', expenses')
     where
         targetCurrency = getStringOption "target.currency" options
         roundTo = getNumberOption "round.to" options
