@@ -2,6 +2,8 @@
 module Syntaxer ( parseString, parse )
 where
 
+import Maybe
+
 import Lexer
 
 import Date
@@ -27,6 +29,11 @@ import Transaction
     '*'     { TokenAsterisk }
     '='     { TokenEqual }
     '-'     { TokenHyphen }
+    '@'     { TokenAt }
+    '('     { TokenOpenParenthesis }
+    ')'     { TokenCloseParenthesis }
+    '['     { TokenOpenBracket }
+    ']'     { TokenCloseBracket }
     param   { TokenParameter }
     fx      { TokenFx }
     group   { TokenGroup }
@@ -41,19 +48,26 @@ All :: { ([Builder]) }
 
 Builders :: { [Builder] }
     : {- empty -} { [] }
-    | Builders Option { $2 : $1 }
-    | Builders Group { $2 : $1 }
-    | Builders Fx { $2 : $1 }
-    | Builders Date { $2 : $1 }
-    | Builders Transaction { $2 : $1 }
+    | Builders Builder { $2 : $1 }
 
-Option :: { Builder }
+Builder :: { Builder }
+    : ParameterBuilder { $1 }
+    | GroupBuilder { $1 }
+    | FxBuilder { $1 }
+    | DateBuilder { $1 }
+    | TransactionBuilder { $1 }
+
+
+
+ParameterBuilder :: { Builder }
     : param string '=' string
         { ParameterBuilder $ StringOption $2 $4 }
     | param string '=' number
         { ParameterBuilder $ NumberOption $2 $4 }
 
-Group :: { Builder }
+
+
+GroupBuilder :: { Builder }
     : group string '=' GroupSides
         { GroupBuilder $ Group $2 (reverse $4) }
 
@@ -68,26 +82,57 @@ GroupSide :: { RawSide }
     | '=' GroupSide { RawSideOverride $2 }
 
 
-Fx :: { Builder }
+
+FxBuilder :: { Builder }
     : fx MoneyWithCurrency '=' MoneyWithCurrency
         { FxBuilder $ Fx $2 $4 }
 
 
-Date :: { Builder }
-    : date string { DateBuilder $ Date $2 }
+
+DateBuilder :: { Builder }
+    : date { DateBuilder Nothing }
+    | date string { DateBuilder $ Just $ Date $2 }
 
 
-Transaction :: { Builder }
-    : RawTransaction { TransactionBuilder $1 }
 
-RawTransaction :: { RawTransaction }
-    : TSides '>' MaybeMoneys '>' TSides { RawTransaction (reverse $1) (reverse $5) $3 "" }
-    | TSides '>' MaybeMoneys '>' TSides ':' Comment { RawTransaction (reverse $1) (reverse $5) $3 $7 }
-    | TSides '>' MaybeMoneys '>' '_' { RawTransaction (reverse $1) (reverse $1) $3 "" }
-    | TSides '>' MaybeMoneys '>' '_' ':' Comment { RawTransaction (reverse $1) (reverse $1) $3 $7 }
+TransactionBuilder :: { Builder }
+    : TSides '>' MaybeMoneys '>' MaybeTSides TransactionAttributeBuilders CommentBuilder
+        { TransactionBuilder
+            (reverse $1)
+            (reverse $ fromMaybe $1 $5)
+            $3
+            ($6 ++ $7) }
 
-Comment :: { String }
-    : string { $1 }
+
+TransactionAttributeBuilders :: { [TransactionAttributeBuilder] }
+    : {- empty -} { [] }
+    | TransactionAttributeBuilders TransactionAttributeBuilder { $2 : $1 }
+
+TransactionAttributeBuilder :: { TransactionAttributeBuilder }
+    : '@' string { ContragentBuilder $ Contragent $2 }
+    | '(' Categories ')' { CategoryBuilder $2 }
+    | '[' Tags ']' { TagsBuilder $2 }
+
+Categories :: { [Category] }
+    : {- empty -} { [] }
+    | Categories ',' Category { $3 : $1 }
+
+Category :: { Category }
+    : string { Category $1 }
+
+Tags :: { [Tag] }
+    : {- empty -} { [] }
+    | Tags ',' Tag { $3 : $1 }
+
+Tag :: { Tag }
+    : string { Tag $1 }
+
+
+CommentBuilder :: { [TransactionAttributeBuilder] }
+    : {- empty -} { [] }
+    | ':' string { [CommentBuilder $ Comment $2] }
+
+
 
 MaybeMoneys :: { Maybe Moneys }
     : '_' { Nothing }
@@ -109,6 +154,11 @@ MoneyWithoutCurrency :: { Money }
 
 MoneyWithCurrency :: { Money }
     : number string { Money $1 $2 }
+
+
+MaybeTSides :: { Maybe [RawSide] }
+    : '_' { Nothing }
+    | TSides { Just $1 }
 
 TSides :: { [RawSide] }
     : TSide { [$1] }

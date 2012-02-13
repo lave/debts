@@ -39,6 +39,11 @@ data Token =
     | TokenAsterisk
     | TokenEqual
     | TokenHyphen
+    | TokenAt
+    | TokenOpenParenthesis
+    | TokenCloseParenthesis
+    | TokenOpenBracket
+    | TokenCloseBracket
     | TokenParameter
     | TokenFx
     | TokenGroup

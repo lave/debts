@@ -45,25 +45,33 @@ calcTest = test [
          Side "kyle" (Moneys [Sum (-20)]),
          Side "kenny" (Moneys [Sum 10])]
         (calc balance [
-            Transaction
-                [Side "stan" (Moneys [Sum 30])] 
-                [Side "eric" (Moneys [Sum 10]),
-                 Side "kyle" (Moneys [Sum 10]),
-                 Side "stan" (Moneys [Sum 10])]
-                "stan bought beer for him, eric and kyle",
-            Transaction
-                [Side "eric" (Moneys [Sum 10]),
-                 Side "stan" (Moneys [Sum 20])]
-                [Side "eric" (Moneys [Sum 10]),
-                 Side "kyle" (Moneys [Sum 10]),
-                 Side "stan" (Moneys [Sum 10])]
-                "stans paid for kyle",
-            Transaction
-                [Side "kenny" (Moneys [Sum 10])]
-                [Side "stan" (Moneys [Sum 10])]
-                "kenny gave money to stan"
+            transaction {
+                payers =
+                    [Side "stan" (Moneys [Sum 30])],
+                beneficators =
+                    [Side "eric" (Moneys [Sum 10]),
+                     Side "kyle" (Moneys [Sum 10]),
+                     Side "stan" (Moneys [Sum 10])]
+            },
+            transaction {
+                payers =
+                    [Side "eric" (Moneys [Sum 10]),
+                     Side "stan" (Moneys [Sum 20])],
+                beneficators =
+                    [Side "eric" (Moneys [Sum 10]),
+                     Side "kyle" (Moneys [Sum 10]),
+                     Side "stan" (Moneys [Sum 10])]
+            },
+            transaction {
+                payers =
+                    [Side "kenny" (Moneys [Sum 10])],
+                beneficators =
+                    [Side "stan" (Moneys [Sum 10])]
+            }
         ]) ~? ""
     ]
+    where
+        transaction = Transaction [] [] Nothing Nothing Nothing [] [] Nothing
 
 
 tests = test [addSidesTests, subSidesTests, calcTest]

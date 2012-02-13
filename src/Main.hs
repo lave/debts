@@ -53,7 +53,7 @@ process (Input options groups fxs transactions) = (balance', expenses')
 
         process' f = sortBy compareSides rounded
             where
-                raw = calc f $ map unifyTransaction $ preprocessTransactions groups transactions
+                raw = calc f $ map (normalizeTransaction groups) transactions
                 converted = applyIfOptionIsSet (convertSides fxs) targetCurrency raw
                 rounded = applyIfOptionIsSet (\b l -> roundSides (round b) l) roundTo converted
 
