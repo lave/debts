@@ -1,5 +1,5 @@
 {
-module Syntaxer ( parseString, parse )
+module Parser ( parseString, parse )
 where
 
 import Maybe

@@ -5,7 +5,7 @@ import InputBuilder
 import Option
 import Money
 import Debt
-import Syntaxer
+import Parser
 import ParserMonad
 import Lexer
 import Transaction

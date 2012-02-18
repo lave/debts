@@ -10,8 +10,8 @@ import Fx
 import InputBuilder
 import Money
 import Option
+import Parser
 import ParserMonad
-import Syntaxer
 import Transaction
 import Utils
 
