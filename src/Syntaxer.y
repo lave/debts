@@ -93,7 +93,7 @@ FxBuilder :: { Builder }
 
 
 DateBuilder :: { Builder }
-    : date { DateBuilder Nothing }
+    : date '_' { DateBuilder Nothing }
     | date string { DateBuilder $ Just $ Date $2 }
 
 
@@ -113,11 +113,12 @@ TransactionAttributeBuilders :: { [TransactionAttributeBuilder] }
 
 TransactionAttributeBuilder :: { TransactionAttributeBuilder }
     : '@' string { ContragentBuilder $ Contragent $2 }
-    | '(' Categories ')' { CategoryBuilder $2 }
-    | '[' Tags ']' { TagsBuilder $2 }
+    | '(' Categories ')' { CategoryBuilder $ reverse $2 }
+    | '[' Tags ']' { TagsBuilder $ reverse $2 }
 
 Categories :: { [Category] }
     : {- empty -} { [] }
+    | Category { [$1] }
     | Categories ',' Category { $3 : $1 }
 
 Category :: { Category }
@@ -125,6 +126,7 @@ Category :: { Category }
 
 Tags :: { [Tag] }
     : {- empty -} { [] }
+    | Tag { [$1] }
     | Tags ',' Tag { $3 : $1 }
 
 Tag :: { Tag }

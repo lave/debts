@@ -1,6 +1,8 @@
 module InputBuilder
 where
 
+import List
+
 import Date
 import Fx
 import Money
@@ -39,18 +41,18 @@ buildInputData builders =
         (reverse transactions)
     where
         (_, Input parameters groups fxs transactions) =
-            foldr build (Context Nothing, Input [] [] [] []) builders
+            foldl build (Context Nothing, Input [] [] [] []) $ builders
 
-        build :: Builder -> (Context, Input) -> (Context, Input)
-        build (ParameterBuilder parameter) (context, Input parameters groups fxs transactions) =
+        build :: (Context, Input) -> Builder -> (Context, Input)
+        build (context, Input parameters groups fxs transactions) (ParameterBuilder parameter) =
             (context, Input (parameter : parameters) groups fxs transactions)
-        build (GroupBuilder group) (context, Input parameters groups fxs transactions) =
+        build (context, Input parameters groups fxs transactions) (GroupBuilder group) =
             (context, Input parameters (group : groups) fxs transactions)
-        build (FxBuilder fx) (context, Input parameters groups fxs transactions) =
+        build (context, Input parameters groups fxs transactions) (FxBuilder fx) =
             (context, Input parameters groups (fx : fxs) transactions)
-        build (DateBuilder date) (context, input) =
+        build (context, input) (DateBuilder date) =
             (Context date, input)
-        build transaction@(TransactionBuilder _ _ _ _) (context@(Context date), Input parameters groups fxs transactions) =
+        build (context@(Context date), Input parameters groups fxs transactions) transaction@(TransactionBuilder _ _ _ _) =
             (context, Input parameters groups fxs ((buildTransaction date transaction) : transactions))
        
 
@@ -66,7 +68,7 @@ buildTransaction date (TransactionBuilder payers beneficators sum attributes) =
         applyAttribute transaction (CategoryBuilder category) =
             transaction { category = category }
         applyAttribute transaction (TagsBuilder tags) =
-            transaction { tags = tags }
+            transaction { tags = nub tags }
         applyAttribute transaction (CommentBuilder comment) =
             transaction { comment = Just comment }
 

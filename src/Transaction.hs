@@ -9,7 +9,8 @@ import Money
 
 
 
-data RawSide = RawSide String
+data RawSide =
+      RawSide String
     | RawSideWithFactor String Double
     | RawSideWithMoney String Moneys
     | RawSideRemove String

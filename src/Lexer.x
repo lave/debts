@@ -21,6 +21,11 @@ tokens :-
     "*"     { \s -> TokenAsterisk }
     "="     { \s -> TokenEqual }
     "-"     { \s -> TokenHyphen }
+    "@"     { \s -> TokenAt }
+    "("     { \s -> TokenOpenParenthesis }
+    ")"     { \s -> TokenCloseParenthesis }
+    "["     { \s -> TokenOpenBracket }
+    "]"     { \s -> TokenCloseBracket }
     "param" { \s -> TokenParameter }
     "fx"    { \s -> TokenFx }
     "group" { \s -> TokenGroup }

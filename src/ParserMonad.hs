@@ -5,7 +5,7 @@ data ParserError a = Ok a | Error String
 
 thenE :: ParserError a -> (a -> ParserError b) -> ParserError b
 thenE (Ok a) f = f a
-thenE (Error s) _ = error s
+thenE (Error s) _ = Error s
 
 returnE :: a -> ParserError a
 returnE a = Ok a
