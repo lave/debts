@@ -41,11 +41,6 @@ data Transaction_ side = Transaction {
     comment :: Maybe Comment
 } deriving (Show)
     
-{-
-instance Eq Transaction_ side where
-    (Transaction p1 b1 c1) == (Transaction p2 b2 c2) =
-        same p1 p2 && same b1 b2 && c1 == c2
--}
 
 type RawTransaction = Transaction_ RawSide
 
