@@ -23,24 +23,25 @@ import Transaction
 
 
 %token
-    '>'     { TokenArrow }
-    ':'     { TokenColumn }
-    '_'     { TokenUnderscore }
-    ','     { TokenComma }
-    '*'     { TokenAsterisk }
-    '='     { TokenEqual }
-    '-'     { TokenHyphen }
-    '@'     { TokenAt }
-    '('     { TokenOpenParenthesis }
-    ')'     { TokenCloseParenthesis }
-    '['     { TokenOpenBracket }
-    ']'     { TokenCloseBracket }
-    param   { TokenParameter }
-    fx      { TokenFx }
-    group   { TokenGroup }
-    string  { TokenString $$ }
-    number  { TokenNumber $$ }
-    date    { TokenDate }
+    '>'         { TokenArrow }
+    ':'         { TokenColumn }
+    '_'         { TokenUnderscore }
+    ','         { TokenComma }
+    '*'         { TokenAsterisk }
+    '='         { TokenEqual }
+    '-'         { TokenHyphen }
+    '@'         { TokenAt }
+    '('         { TokenOpenParenthesis }
+    ')'         { TokenCloseParenthesis }
+    '['         { TokenOpenBracket }
+    ']'         { TokenCloseBracket }
+    param       { TokenParameter }
+    fx          { TokenFx }
+    group       { TokenGroup }
+    date        { TokenDate }
+    internal    { TokenInternal }
+    string      { TokenString $$ }
+    number      { TokenNumber $$ }
 
 %monad {ParserError} {thenE} {returnE}
 
@@ -112,9 +113,13 @@ TransactionAttributeBuilders :: { [TransactionAttributeBuilder] }
     | TransactionAttributeBuilders TransactionAttributeBuilder { $2 : $1 }
 
 TransactionAttributeBuilder :: { TransactionAttributeBuilder }
-    : '@' string { ContragentBuilder $ Contragent $2 }
+    : Contragent { ContragentBuilder $1 }
     | '(' Categories ')' { CategoryBuilder $ reverse $2 }
     | '[' Tags ']' { TagsBuilder $ reverse $2 }
+
+Contragent :: { Contragent }
+    : '@' internal { Internal }
+    | '@' string { Contragent $2 }
 
 Categories :: { [Category] }
     : {- empty -} { [] }

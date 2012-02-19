@@ -39,19 +39,29 @@ subSidesTests = test [
 
 
 calcTest = test [
-    "" ~: same
+    "balance" ~: same
         [Side "stan" (Moneys [Sum 20]),
          Side "eric" (Moneys [Sum (-10)]),
          Side "kyle" (Moneys [Sum (-20)]),
          Side "kenny" (Moneys [Sum 10])]
-        (calc balance [
+        (calc balance transactions) ~? "",
+
+    "balance" ~: same
+        [Side "stan" (Moneys [Sum 20]),
+         Side "eric" (Moneys [Sum 20]),
+         Side "kyle" (Moneys [Sum 20])]
+        (calc expenses transactions) ~? ""
+    ]
+    where
+        transactions = [
             transaction {
                 payers =
                     [Side "stan" (Moneys [Sum 30])],
                 beneficators =
                     [Side "eric" (Moneys [Sum 10]),
                      Side "kyle" (Moneys [Sum 10]),
-                     Side "stan" (Moneys [Sum 10])]
+                     Side "stan" (Moneys [Sum 10])],
+                contragent = Just $ Contragent "pub"
             },
             transaction {
                 payers =
@@ -66,11 +76,9 @@ calcTest = test [
                 payers =
                     [Side "kenny" (Moneys [Sum 10])],
                 beneficators =
-                    [Side "stan" (Moneys [Sum 10])]
-            }
-        ]) ~? ""
-    ]
-    where
+                    [Side "stan" (Moneys [Sum 10])],
+                contragent = Just Internal  --  intenral transaction - must not be taken into account during expenses calculation
+            }]
         transaction = Transaction [] [] Nothing Nothing Nothing [] [] Nothing
 
 

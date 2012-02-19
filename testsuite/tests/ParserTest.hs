@@ -130,6 +130,9 @@ parseTransactionsTest = test [
         Just [transaction { comment = Just $ Comment "long comment" }]
         ~=? parseTransactions "A > 50 > B : \"long comment\"",
 
+    "internal" ~:
+        Just [transaction { contragent = Just Internal }]
+        ~=? parseTransactions "A > 50 > B @ internal",
     "contragent" ~:
         Just [transaction { contragent = Just $ Contragent "shop" }]
         ~=? parseTransactions "A > 50 > B @ shop",

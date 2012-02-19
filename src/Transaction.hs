@@ -18,7 +18,9 @@ data RawSide =
     deriving (Show, Eq)
 
 
-newtype Contragent = Contragent String
+data Contragent =
+      Internal
+    | Contragent String
     deriving (Show, Eq)
 
 newtype Category = Category String

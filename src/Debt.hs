@@ -16,8 +16,15 @@ balance sides transaction =
         `subSides` (beneficators transaction)
 
 expenses :: [Side] -> NormalizedTransaction -> [Side]
-expenses sides transaction =
-    sides `addSides` (beneficators transaction)
+expenses sides transaction
+    | isInternal transaction = sides
+    | otherwise = sides `addSides` (beneficators transaction)
+    where
+        isInternal transaction =
+            case (contragent transaction) of
+                Just Internal -> True
+                _ -> False
+
 
 addSides = combineSides add
 subSides = combineSides sub
