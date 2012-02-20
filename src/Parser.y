@@ -23,25 +23,25 @@ import Transaction
 
 
 %token
-    '>'         { TokenArrow }
-    ':'         { TokenColumn }
-    '_'         { TokenUnderscore }
-    ','         { TokenComma }
-    '*'         { TokenAsterisk }
-    '='         { TokenEqual }
-    '-'         { TokenHyphen }
-    '@'         { TokenAt }
-    '('         { TokenOpenParenthesis }
-    ')'         { TokenCloseParenthesis }
-    '['         { TokenOpenBracket }
-    ']'         { TokenCloseBracket }
-    param       { TokenParameter }
-    fx          { TokenFx }
-    group       { TokenGroup }
-    date        { TokenDate }
-    internal    { TokenInternal }
-    string      { TokenString $$ }
-    number      { TokenNumber $$ }
+    '>'         { Token _ (TokenSym '>') }
+    ':'         { Token _ (TokenSym ':') }
+    '_'         { Token _ (TokenSym '_') }
+    ','         { Token _ (TokenSym ',') }
+    '*'         { Token _ (TokenSym '*') }
+    '='         { Token _ (TokenSym '=') }
+    '-'         { Token _ (TokenSym '-') }
+    '@'         { Token _ (TokenSym '@') }
+    '('         { Token _ (TokenSym '(') }
+    ')'         { Token _ (TokenSym ')') }
+    '['         { Token _ (TokenSym '[') }
+    ']'         { Token _ (TokenSym ']') }
+    param       { Token _ (TokenKeyword "param") }
+    fx          { Token _ (TokenKeyword "fx") }
+    group       { Token _ (TokenKeyword "group") }
+    date        { Token _ (TokenKeyword "date") }
+    internal    { Token _ (TokenKeyword "internal") }
+    string      { Token _ (TokenString $$) }
+    number      { Token _ (TokenNumber $$) }
 
 %monad {ParserError} {thenE} {returnE}
 
@@ -195,7 +195,17 @@ SideRemove :: { RawSide }
 
 {
 parseError :: [Token] -> ParserError a
-parseError tokens = Error ("Parse error: " ++ show (head tokens))
+parseError tokens =
+    Error $ "Parse error at " ++ errorPosition tokens ++ ": "
+        ++ show (token_data $ head tokens)
+
+errorPosition:: [Token] -> String
+errorPosition tokens =
+    case tokens of
+        [] -> "end of script"
+        token:_ -> show line ++ ":" ++ show column
+            where
+                AlexPn _ line column = token_position token
 
 parseString :: String -> ParserError [Builder]
 parseString = parse . alexScanTokens
