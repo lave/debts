@@ -9,9 +9,6 @@ import Utils
 roundTo :: (Integral b, RealFrac a) => b -> a -> b
 roundTo base x = ((* base) . round . (/ (fromIntegral base))) x
 
-roundListTo :: (Integral b, RealFrac a) => b -> [a] -> [b]
-roundListTo base = map (roundTo base)
-
 roundSides :: (Integral b) => b -> [Side] -> [Side]
 roundSides base sides
     | allSidesHaveSameCurrency sides = map (roundSide base) sides
