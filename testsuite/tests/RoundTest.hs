@@ -39,7 +39,15 @@ smartRoundTest = test [
 
     "several payers both have priority" ~:
         [10, 10, 10, 10, -10, -30] ~=?
-        smartRound 10 [14, 14, 14, 14, -18, -38]
+        smartRound 10 [14, 14, 14, 14, -18, -38],
+
+    "when all are equal, first pays for all - 1" ~:
+        [-10, 10, 0, 0, 0] ~=?
+        smartRound 10 [-2, 8, -2, -2, -2],
+
+    "when all are equal, first pays for all - 2" ~:
+        [0, 0, 0, 0, 0] ~=?
+        smartRound 10 [8, -2, -2, -2, -2]
     ]
 
 
