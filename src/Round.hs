@@ -8,7 +8,7 @@ roundTo base = (* base) . fromIntegral . round . (/ base)
 smartRound :: RealFrac a => a -> [a] -> [a]
 smartRound base numbers
     | base <= 0 = error "base must be greater than zero"
-    | sum numbers /= 0 = error "sum must be 0"
+    -- | sum numbers /= 0 = error ("sum must be 0, not " ++ (show $ sum numbers))
     | otherwise =
         map snd $ foldl flip (zip numbers rounded) [1..flipCount]
     where

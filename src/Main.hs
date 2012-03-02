@@ -61,7 +61,7 @@ process' (Input options groups fxs transactions) = (balance', expenses')
             where
                 raw = calc f $ map (normalizeTransaction groups) transactions
                 converted = applyIfOptionIsSet (convertSides fxs) targetCurrency raw
-                rounded = applyIfOptionIsSet (\b l -> roundSides (round b) l) roundTo converted
+                rounded = applyIfOptionIsSet roundSides roundTo converted
 
                 applyIfOptionIsSet f (Just x) a = f x a
                 applyIfOptionIsSet _ Nothing a = a

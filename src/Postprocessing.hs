@@ -1,31 +1,42 @@
 module Postprocessing ( roundSides )
 where
 
+import Maybe
+
 import Money
+import Round
 import Transaction
 import Utils
 
 
-roundTo :: (Integral b, RealFrac a) => b -> a -> b
-roundTo base x = ((* base) . round . (/ (fromIntegral base))) x
-
-roundSides :: (Integral b) => b -> [Side] -> [Side]
+roundSides :: Double -> [Side] -> [Side]
 roundSides base sides
-    | allSidesHaveSameCurrency sides = map (roundSide base) sides
+    | allSidesHaveSameCurrency sides =
+        zipWith setSideMoney sides (smartRound base $ map getSideMoney sides)
     | otherwise = sides
     where
         allSidesHaveSameCurrency :: [Side] -> Bool
         allSidesHaveSameCurrency = allSame getSideCurrency
-        getSideCurrency (Side _ (Moneys [m])) = Just (getCurrency m)
-            where
-                getCurrency (Sum _) = Nothing
-                getCurrency (Money _ c) = Just c
-        getSideCurrency _ = Nothing
 
-        roundSide :: (Integral b) => b -> Side -> Side
-        roundSide base (Side n (Moneys moneys)) = Side n $ Moneys $ map (roundMoney base) moneys
+        currency = case sides of
+            [] -> Nothing
+            _ -> fromJust $ getSideCurrency $ head sides
 
-        roundMoney :: (Integral b) => b -> Money -> Money
-        roundMoney base (Sum q) = Sum $ fromIntegral $ roundTo base q
-        roundMoney base (Money q c) = Money (fromIntegral $ roundTo base q) c
+        getSideCurrency (Side _ (Moneys moneys)) =
+            case moneys of
+                [] -> Just Nothing
+                [Sum _] -> Just Nothing
+                [Money _ c] -> Just $ Just c
+                _ -> Nothing
 
+        getSideMoney (Side _ (Moneys moneys)) =
+            case moneys of
+                [] -> 0
+                [Sum s] -> s
+                [Money s _] -> s
+                _ -> error ("currencies: " ++ show (map getSideCurrency sides))
+
+        setSideMoney (Side name _) s
+            | s == 0 = Side name $ Moneys []
+            | currency == Nothing = Side name $ Moneys [Sum s]
+            | otherwise = Side name $ Moneys [Money s $ fromJust currency]
