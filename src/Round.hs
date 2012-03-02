@@ -4,6 +4,9 @@ where
 roundTo :: RealFrac a => a -> a -> a
 roundTo base = (* base) . fromIntegral . round . (/ base)
 
+roundListTo :: RealFrac a => a -> [a] -> [a]
+roundListTo base = map (roundTo base)
+
 
 smartRound :: RealFrac a => a -> [a] -> [a]
 smartRound base numbers
@@ -12,7 +15,7 @@ smartRound base numbers
     | otherwise =
         map snd $ foldl flip (zip numbers rounded) [1..flipCount]
     where
-        rounded = map (roundTo base) numbers
+        rounded = roundListTo base numbers
         totalDeviation = sum rounded
         step = if totalDeviation > 0 then (-base) else base
         flipCount = round $ abs $ totalDeviation / base

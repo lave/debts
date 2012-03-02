@@ -11,6 +11,7 @@ import Lexer
 import Transaction
 import Fx
 import Postprocessing
+import Round
 
 import System
 import List
@@ -54,14 +55,14 @@ process' (Input options groups fxs transactions) = (balance', expenses')
         targetCurrency = getStringOption "target.currency" options
         roundTo = getNumberOption "round.to" options
 
-        balance' = process' balance
-        expenses' = process' expenses
+        balance' = process' balance smartRound
+        expenses' = process' expenses roundListTo
 
-        process' f = sortBy compareSides rounded
+        process' calculator rounder = sortBy compareSides rounded
             where
-                raw = calc f $ map (normalizeTransaction groups) transactions
+                raw = calc calculator $ map (normalizeTransaction groups) transactions
                 converted = applyIfOptionIsSet (convertSides fxs) targetCurrency raw
-                rounded = applyIfOptionIsSet roundSides roundTo converted
+                rounded = applyIfOptionIsSet (roundSides rounder) roundTo converted
 
                 applyIfOptionIsSet f (Just x) a = f x a
                 applyIfOptionIsSet _ Nothing a = a

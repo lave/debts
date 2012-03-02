@@ -9,10 +9,10 @@ import Transaction
 import Utils
 
 
-roundSides :: Double -> [Side] -> [Side]
-roundSides base sides
+roundSides :: (Double -> [Double] -> [Double]) -> Double -> [Side] -> [Side]
+roundSides rounder base sides
     | allSidesHaveSameCurrency sides =
-        zipWith setSideMoney sides (smartRound base $ map getSideMoney sides)
+        zipWith setSideMoney sides (rounder base $ map getSideMoney sides)
     | otherwise = sides
     where
         allSidesHaveSameCurrency :: [Side] -> Bool
