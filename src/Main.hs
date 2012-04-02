@@ -2,7 +2,7 @@ module Main ( main )
 where
 
 import InputBuilder
-import Option
+import Param
 import Money
 import Debt
 import Parser
@@ -52,8 +52,8 @@ process' :: Input -> ([Side], [Side])
 
 process' (Input options groups fxs transactions) = (balance', expenses')
     where
-        targetCurrency = getStringOption "target.currency" options
-        roundTo = getNumberOption "round.to" options
+        targetCurrency = getStringParam "target.currency" options
+        roundTo = getNumberParam "round.to" options
 
         balance' = process' balance smartRound
         expenses' = process' expenses roundListTo
@@ -61,11 +61,11 @@ process' (Input options groups fxs transactions) = (balance', expenses')
         process' calculator rounder = sortBy compareSides rounded
             where
                 raw = calc calculator $ map (normalizeTransaction groups) transactions
-                converted = applyIfOptionIsSet (convertSides fxs) targetCurrency raw
-                rounded = applyIfOptionIsSet (roundSides rounder) roundTo converted
+                converted = applyIfParamIsSet (convertSides fxs) targetCurrency raw
+                rounded = applyIfParamIsSet (roundSides rounder) roundTo converted
 
-                applyIfOptionIsSet f (Just x) a = f x a
-                applyIfOptionIsSet _ Nothing a = a
+                applyIfParamIsSet f (Just x) a = f x a
+                applyIfParamIsSet _ Nothing a = a
                 
                 compareSides (Side n1 _) (Side n2 _) = compare n1 n2
 
