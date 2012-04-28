@@ -2,7 +2,7 @@
 module Parser ( parseString, parse )
 where
 
-import Maybe
+import Data.Maybe
 
 import Lexer
 import ParserMonad
@@ -11,7 +11,7 @@ import Date
 import Fx
 import InputBuilder
 import Money
-import Option
+import Param
 import Transaction
 
 }
@@ -65,9 +65,9 @@ Builder :: { Builder }
 
 ParameterBuilder :: { Builder }
     : param string '=' string
-        { ParameterBuilder $ StringOption $2 $4 }
+        { ParameterBuilder ($2, $4) }
     | param string '=' number
-        { ParameterBuilder $ NumberOption $2 $4 }
+        { ParameterBuilder ($2, show $4) }
 
 
 

@@ -1,6 +1,9 @@
 module Main ( main )
 where
 
+--import System
+import Data.List
+
 import InputBuilder
 import Param
 import Money
@@ -12,9 +15,6 @@ import Transaction
 import Fx
 import Postprocessing
 import Round
-
-import System
-import List
 
 
 main = do

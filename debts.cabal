@@ -10,12 +10,12 @@ Extra-source-files: testsute/test/RunTests.hs
 
 Executable debts
   Main-is:          Main.hs
-  Build-Depends:    base, haskell98, array
+  Build-Depends:    base, array, containers
   Hs-Source-Dirs:   src
-  Other-Modules:    Date Debt Fx Lexer Main Money Option Postprocessing Parser Transaction Utils
+  Other-Modules:    Date Debt Fx Lexer Main Money Param Postprocessing Parser Transaction Utils
 
 Test-Suite unit-tests
   Type:             exitcode-stdio-1.0
   Hs-Source-Dirs:   testsuite/tests src dist/build/debts/debts-tmp
-  Build-Depends:    base, haskell98, array, HUnit
+  Build-Depends:    base, array, HUnit
   Main-Is:          RunTests.hs

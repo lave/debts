@@ -1,12 +1,12 @@
 module Transaction
 where
 
+import Data.List
+import Data.Maybe
+
 import Date
-import List
-import Maybe
 import Utils
 import Money
-
 
 
 data RawSide =
@@ -99,7 +99,7 @@ normalizeSides sum payers beneficators = (sum', payers', beneficators')
 
         allTheSame l | length l' == 1 = head l'
             where
-                l' = nub (filter Maybe.isJust l)
+                l' = nub (filter isJust l)
         getMoneysOnlyIfAllHasMoneys sides
             | all hasMoney sides = Just $ sumMoney sides
             | otherwise = Nothing
@@ -109,7 +109,7 @@ normalizeSides sum payers beneficators = (sum', payers', beneficators')
 
         sumFactors :: [RawSide] -> Double
         sumFactors sides =
-            List.sum $ map getFactor sides
+            Data.List.sum $ map getFactor sides
             where
                 getFactor (RawSide _) = 1
                 getFactor (RawSideWithFactor _ factor) = factor

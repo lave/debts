@@ -1,17 +1,17 @@
 module InputBuilder
 where
 
-import List
+import Data.List
 
 import Date
 import Fx
 import Money
-import Option
+import Param
 import Transaction
 
 
 data Builder =
-      ParameterBuilder Option
+      ParameterBuilder (String, String)
     | GroupBuilder Group
     | FxBuilder Fx
     | DateBuilder (Maybe Date)

@@ -3,7 +3,7 @@ where
 
 import Test.HUnit
 
-import Maybe
+import Data.Maybe
 
 import Date
 import Fx
@@ -21,14 +21,14 @@ s1 +++ s2 = s1 ++ "\n" ++ s2
 
 parseParametersTest = test [
     "srting parameter" ~:
-        Just [StringOption "s" "a"]
+        Just [("s", "a")]
         ~=? parseParameters "param s=a",
     "multiword srting parameter" ~:
-        Just [StringOption "s" "a a"]
+        Just [("s", "a a")]
         ~=? parseParameters "param s=\"a a\"",
 
     "number parameter" ~:
-        Just [NumberOption "s" 1.3]
+        Just [("s", "1.3")]
         ~=? parseParameters "param s=1.3"
     ]
 
