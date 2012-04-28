@@ -24,16 +24,17 @@ addTests = test [
 -}
     ]
 
-testFxs =
-    [Fx (Money 30 "RUR") (Money 1 "USD"),
-     Fx (Money 1 "RUR") (Money 5 "KZT")]
-
-
 convertTests = test [
     "" ~:
         (Moneys [Money 50 "RUR"]) ~=?
         convert testFxs "RUR" (Moneys [Money 10 "RUR", Money 50 "KZT", Money 1 "USD"])
     ]
+    where
+        testFxs =
+            [Fx (Money 30 "RUR") (Money 1 "USD"),
+             Fx (Money 1 "RUR") (Money 5 "KZT")]
+
+
 
 tests = test [addTests, convertTests]
 

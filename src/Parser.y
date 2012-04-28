@@ -2,7 +2,7 @@
 module Parser ( parseString, parse )
 where
 
-import Maybe
+import Data.Maybe
 
 import Lexer
 import ParserMonad
@@ -65,9 +65,9 @@ Builder :: { Builder }
 
 ParameterBuilder :: { Builder }
     : param string '=' string
-        { ParameterBuilder $ StringParam $2 $4 }
+        { ParameterBuilder ($2, $4) }
     | param string '=' number
-        { ParameterBuilder $ NumberParam $2 $4 }
+        { ParameterBuilder ($2, show $4) }
 
 
 

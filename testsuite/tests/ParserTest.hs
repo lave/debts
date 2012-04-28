@@ -3,7 +3,7 @@ where
 
 import Test.HUnit
 
-import Maybe
+import Data.Maybe
 
 import Date
 import Fx

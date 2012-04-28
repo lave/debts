@@ -1,7 +1,7 @@
 module InputBuilder
 where
 
-import List
+import Data.List
 
 import Date
 import Fx
