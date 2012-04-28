@@ -1,7 +1,7 @@
 module Postprocessing ( roundSides )
 where
 
-import Maybe
+import Data.Maybe
 
 import Money
 import Round

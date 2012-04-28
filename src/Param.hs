@@ -1,50 +1,86 @@
 module Param
 where
 
-data Param =
-      StringParam String String 
-    | NumberParam String Double
-    deriving (Eq, Show)
+import Data.List
+import Data.Maybe
+import Data.Map (Map)
+import qualified Data.Map as Map
 
+
+-- parameter type
 data ParamType =
-    = StringParameter
+      StringParameter
     | NumberParameter
     deriving (Eq, Show)
 
-data ParamAggregateType =
-    = NoOverride
+-- parameter aggregation type
+data ParamAggType =
+      NoOverride
     | Override
     | Multiple
     deriving (Eq, Show)
 
-data ParamDescription
-    = Param String ParamType AccumulateType 
-    deriving (Eq, Show)
+-- parameter descriptor
+data ParamDescriptor = Param {
+    paramName :: String,
+    paramType :: ParamType,
+    paramAggType :: ParamAggType 
+} deriving (Eq, Show)
 
 
-optionDescriptors = [
+combineStrings separator = \s1 s2 -> s1 ++ separator ++ s2
+
+parameterDescriptors = [
     Param "round.to" NumberParameter Override,
     Param "target.currency" StringParameter Override,
     Param "aggregate" StringParameter Multiple
     ]
 
-data Params = Params [Param]
+data Param =
+      StringParam String String
+    | NumberParam String Double
+    deriving (Eq, Show)
 
-getStringParam n opts =
-    find opts
+type Params = Map String Param
+
+
+--data Params = Params [ParamDescriptor] [Param]
+
+
+getDescriptor :: [ParamDescriptor] -> String -> ParamDescriptor
+getDescriptor descriptors name =
+    case find ((== name) . paramName) descriptors of
+        Just descriptor -> descriptor
+        Nothing -> error $ "Unknown parameter " ++ name
+
+
+type RawParam = (String, String)
+
+addParam :: [ParamDescriptor] -> Params -> RawParam -> Params
+addParam descriptors params rawParam@(name, value) =
+    case paramAggType descriptor of
+        NoOverride -> Map.insertWith (flip const) name param params
+        Override   -> Map.insert name param params
+        Multiple   -> Map.insertWith (combineStrings name [param] params
     where
-        find [] = Nothing
-        find ((StringParam n1 v) : opts)
-            | n == n1 = Just v
-            | otherwise = find opts
-        find (_ : opts) = find opts
+        descriptor = getDescriptor descriptors name
+        param = makeParam (paramType descriptor) name value
 
-getNumberParam n opts =
-    find opts
-    where
-        find [] = Nothing
-        find ((NumberParam n1 v) : opts)
-            | n == n1 = Just v
-            | otherwise = find opts
-        find (_ : opts) = find opts
+        makeParam StringParameter name value = StringParam name value
+        makeParam NumberParameter name value = NumberParam name $ read value
+    
 
+getStringParam :: Params -> String -> Maybe String
+getStringParam params name =
+    case Map.lookup params name of
+        Just (StringParameter _ value) -> Just value
+        Nothing -> Nothing
+        _ -> error "Parameter " ++ name ++ " is not a number"
+
+
+getNumberParam :: Params -> String -> Maybe Double
+getNumberParam params name =
+    case Map.lookup params name of
+        Just (NumberParameter _ value) -> Just value
+        Nothing -> Nothing
+        _ -> error "Parameter " ++ name ++ " is not a number"

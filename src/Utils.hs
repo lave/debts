@@ -1,13 +1,13 @@
 module Utils ( same, allSame, trimFirst, trimLast, trimBoth )
 where
 
-import List
+import Data.List
 
 
 same :: Eq a => [a] -> [a] -> Bool
 same l1 l2 =
     length l1 == length l2 &&
-    length l1 == length (List.intersect l1 l2)
+    length l1 == length (intersect l1 l2)
 
 
 allSame :: Eq b => (a -> b) -> [a] -> Bool

@@ -3,7 +3,7 @@ where
 
 import Money
 import Utils
-import List
+import Data.List
 
 data Fx = Fx Money Money deriving (Eq, Show)
 
