@@ -6,12 +6,12 @@ import List
 import Date
 import Fx
 import Money
-import Option
+import Param
 import Transaction
 
 
 data Builder =
-      ParameterBuilder Option
+      ParameterBuilder Param
     | GroupBuilder Group
     | FxBuilder Fx
     | DateBuilder (Maybe Date)
@@ -27,7 +27,7 @@ data TransactionAttributeBuilder =
     deriving Show
     
     
-data Input = Input [Option] [Group] [Fx] [RawTransaction]
+data Input = Input [Param] [Group] [Fx] [RawTransaction]
 
 data Context = Context (Maybe Date)
 

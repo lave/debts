@@ -1,31 +1,42 @@
 module Param
 where
 
-data Param =
-      StringParam String String 
+data Param
+    = StringParam String String 
     | NumberParam String Double
     deriving (Eq, Show)
 
-data ParamType =
+data ParamType
     = StringParameter
     | NumberParameter
     deriving (Eq, Show)
 
-data ParamAggregateType =
+type Concatenator = String -> String -> String
+
+data ParamAggregateType
     = NoOverride
     | Override
-    | Multiple
+    | Multiple Concatenator
+
+
+
+newtype ParamName = ParamName String
+    deriving (Eq, Show)
+newtype ParamValue = ParamValue String
     deriving (Eq, Show)
 
 data ParamDescription
-    = Param String ParamType AccumulateType 
-    deriving (Eq, Show)
+    = Param ParamName ParamType ParamAggregateType 
 
+data Param_ = Param_ ParamName ParamValue
+
+concatWith separator =
+    \s1 s2 -> s1 ++ separator ++ s2
 
 optionDescriptors = [
-    Param "round.to" NumberParameter Override,
-    Param "target.currency" StringParameter Override,
-    Param "aggregate" StringParameter Multiple
+    Param (ParamName "round.to") NumberParameter Override,
+    Param (ParamName "target.currency") StringParameter Override,
+    Param (ParamName "aggregate") StringParameter (Multiple (concatWith ";"))
     ]
 
 data Params = Params [Param]

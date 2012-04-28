@@ -9,7 +9,7 @@ import Date
 import Fx
 import InputBuilder
 import Money
-import Option
+import Param
 import Parser
 import ParserMonad
 import Transaction
@@ -21,14 +21,14 @@ s1 +++ s2 = s1 ++ "\n" ++ s2
 
 parseParametersTest = test [
     "srting parameter" ~:
-        Just [StringOption "s" "a"]
+        Just [StringParam "s" "a"]
         ~=? parseParameters "param s=a",
     "multiword srting parameter" ~:
-        Just [StringOption "s" "a a"]
+        Just [StringParam "s" "a a"]
         ~=? parseParameters "param s=\"a a\"",
 
     "number parameter" ~:
-        Just [NumberOption "s" 1.3]
+        Just [NumberParam "s" 1.3]
         ~=? parseParameters "param s=1.3"
     ]
 
