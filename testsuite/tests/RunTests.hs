@@ -7,6 +7,7 @@ import DebtTest
 import FxTest
 import LexerTest
 import MoneyTest
+import ParamTest
 import ParserTest
 import RoundTest
 import TransactionTest
@@ -19,6 +20,7 @@ allTests = TestList [
         LexerTest.tests,
         MoneyTest.tests,
         ParserTest.tests,
+        ParamTest.tests,
         RoundTest.tests,
         TransactionTest.tests,
         UtilsTest.tests

@@ -21,14 +21,14 @@ s1 +++ s2 = s1 ++ "\n" ++ s2
 
 parseParametersTest = test [
     "srting parameter" ~:
-        Just [StringParam "s" "a"]
+        Just [("s", "a")]
         ~=? parseParameters "param s=a",
     "multiword srting parameter" ~:
-        Just [StringParam "s" "a a"]
+        Just [("s", "a a")]
         ~=? parseParameters "param s=\"a a\"",
 
     "number parameter" ~:
-        Just [NumberParam "s" 1.3]
+        Just [("s", "1.3")]
         ~=? parseParameters "param s=1.3"
     ]
 

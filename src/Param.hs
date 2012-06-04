@@ -17,13 +17,7 @@ data ParamType =
 data ParamAggType =
       NoOverride
     | Override
-    | Multiple Concatenator
-
-
-
-newtype ParamName = ParamName String
-    deriving (Eq, Show)
-newtype ParamValue = ParamValue String
+    | Concatenate String
     deriving (Eq, Show)
 
 -- parameter descriptor
@@ -33,26 +27,11 @@ data ParamDescriptor = Param {
     paramAggType :: ParamAggType 
 } deriving (Eq, Show)
 
-concatWith separator =
-    \s1 s2 -> s1 ++ separator ++ s2
 
-combineStrings separator = \s1 s2 -> s1 ++ separator ++ s2
+concatStrings separator = \s1 s2 -> s1 ++ separator ++ s2
 
-parameterDescriptors = [
-    Param "round.to" NumberParameter Override,
-    Param "target.currency" StringParameter Override,
-    Param "aggregate" StringParameter Multiple
-    ]
-
-data Param =
-      StringParam String String
-    | NumberParam String Double
-    deriving (Eq, Show)
-
-type Params = Map String Param
-
-
---data Params = Params [ParamDescriptor] [Param]
+type RawParam = (String, String)
+type RawParams = Map String String
 
 
 getDescriptor :: [ParamDescriptor] -> String -> ParamDescriptor
@@ -62,33 +41,61 @@ getDescriptor descriptors name =
         Nothing -> error $ "Unknown parameter " ++ name
 
 
-type RawParam = (String, String)
-
-addParam :: [ParamDescriptor] -> Params -> RawParam -> Params
-addParam descriptors params rawParam@(name, value) =
+addParam :: [ParamDescriptor] -> RawParams -> RawParam -> RawParams
+addParam descriptors params (name, value) =
     case paramAggType descriptor of
-        NoOverride -> Map.insertWith (flip const) name param params
-        Override   -> Map.insert name param params
-        Multiple   -> Map.insertWith (combineStrings name [param] params
+        NoOverride ->
+            Map.insertWith (flip const) name value params
+        Override ->
+            Map.insert name value params
+        Concatenate separator ->
+            Map.insertWith (flip $ concatStrings separator) name value params
     where
         descriptor = getDescriptor descriptors name
-        param = makeParam (paramType descriptor) name value
 
-        makeParam StringParameter name value = StringParam name value
-        makeParam NumberParameter name value = NumberParam name $ read value
-    
+
+data Param =
+      StringParam String
+    | NumberParam Double
+    deriving (Eq, Show)
+
+
+type Params = Map String Param
+parseParams :: [ParamDescriptor] -> RawParams -> Params
+parseParams descriptors params =
+    Map.mapWithKey (makeParam descriptors) params
+    where
+        makeParam descriptors name value =
+            makeParam' (paramType $ getDescriptor descriptors name) value
+        makeParam' StringParameter value = StringParam value
+        makeParam' NumberParameter value = NumberParam $ read value
+
+
+makeParams descriptors rawParams =
+    parseParams descriptors $
+        foldl (addParam descriptors) Map.empty rawParams
+
 
 getStringParam :: Params -> String -> Maybe String
 getStringParam params name =
-    case Map.lookup params name of
-        Just (StringParameter _ value) -> Just value
+    case Map.lookup name params of
+        Just (StringParam value) -> Just value
         Nothing -> Nothing
-        _ -> error "Parameter " ++ name ++ " is not a number"
+        _ -> error $ "Parameter " ++ name ++ " is not a string"
+
+
+getStringsParam :: Params -> String -> [String]
+getStringsParam params name =
+    case Map.lookup name params of
+        Just (StringParam value) -> [value]
+        Nothing -> []
+        _ -> error $ "Parameter " ++ name ++ " is not a string"
 
 
 getNumberParam :: Params -> String -> Maybe Double
 getNumberParam params name =
-    case Map.lookup params name of
-        Just (NumberParameter _ value) -> Just value
+    case Map.lookup name params of
+        Just (NumberParam value) -> Just value
         Nothing -> Nothing
-        _ -> error "Parameter " ++ name ++ " is not a number"
+        _ -> error $ "Parameter " ++ name ++ " is not a number"
+
