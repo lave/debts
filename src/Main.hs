@@ -1,7 +1,7 @@
-module Main ( main )
+module Main (main)
 where
 
---import System
+import System.Environment
 import Data.List
 
 import InputBuilder
@@ -47,13 +47,20 @@ process args parsed = do
 
 
 
+parameterDescriptors = [
+    Param "round.to" NumberParameter Override,
+    Param "target.currency" StringParameter Override,
+    Param "aggregate" StringParameter (Concatenate ";")
+    ]
+
 
 process' :: Input -> ([Side], [Side])
 
-process' (Input options groups fxs transactions) = (balance', expenses')
+process' (Input rawParams groups fxs transactions) = (balance', expenses')
     where
-        targetCurrency = getStringParam "target.currency" options
-        roundTo = getNumberParam "round.to" options
+        params = makeParams parameterDescriptors rawParams
+        targetCurrency = getStringParam params "target.currency"
+        roundTo = getNumberParam params "round.to"
 
         balance' = process' balance smartRound
         expenses' = process' expenses roundListTo

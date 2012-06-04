@@ -11,7 +11,7 @@ import Transaction
 
 
 data Builder =
-      ParameterBuilder Param
+      ParameterBuilder RawParam
     | GroupBuilder Group
     | FxBuilder Fx
     | DateBuilder (Maybe Date)
@@ -27,7 +27,7 @@ data TransactionAttributeBuilder =
     deriving Show
     
     
-data Input = Input [Param] [Group] [Fx] [RawTransaction]
+data Input = Input [RawParam] [Group] [Fx] [RawTransaction]
 
 data Context = Context (Maybe Date)
 
