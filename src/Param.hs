@@ -1,9 +1,14 @@
-module Param
+module Param (
+    ParamType(..), ParamAggType(..), ParamDescriptor(..),
+    RawParam,
+    makeParams,
+    getStringParam, getStringsParam, getNumberParam)
 where
 
 import Data.List
 import Data.Maybe
 import Data.Map (Map)
+import Data.List.Utils (split)
 import qualified Data.Map as Map
 
 
@@ -55,22 +60,24 @@ addParam descriptors params (name, value) =
 
 
 data Param =
-      StringParam String
-    | NumberParam Double
+      StringParam ParamDescriptor String
+    | NumberParam ParamDescriptor Double
     deriving (Eq, Show)
-
-
 type Params = Map String Param
+
 parseParams :: [ParamDescriptor] -> RawParams -> Params
 parseParams descriptors params =
     Map.mapWithKey (makeParam descriptors) params
     where
         makeParam descriptors name value =
-            makeParam' (paramType $ getDescriptor descriptors name) value
-        makeParam' StringParameter value = StringParam value
-        makeParam' NumberParameter value = NumberParam $ read value
+            makeParam' (paramType descriptor) value
+            where
+                descriptor = getDescriptor descriptors name
+                makeParam' StringParameter value = StringParam descriptor value
+                makeParam' NumberParameter value = NumberParam descriptor $ read value
 
 
+makeParams :: [ParamDescriptor] -> [RawParam] -> Params
 makeParams descriptors rawParams =
     parseParams descriptors $
         foldl (addParam descriptors) Map.empty rawParams
@@ -79,7 +86,7 @@ makeParams descriptors rawParams =
 getStringParam :: Params -> String -> Maybe String
 getStringParam params name =
     case Map.lookup name params of
-        Just (StringParam value) -> Just value
+        Just (StringParam _ value) -> Just value
         Nothing -> Nothing
         _ -> error $ "Parameter " ++ name ++ " is not a string"
 
@@ -87,7 +94,10 @@ getStringParam params name =
 getStringsParam :: Params -> String -> [String]
 getStringsParam params name =
     case Map.lookup name params of
-        Just (StringParam value) -> [value]
+        Just (StringParam descriptor value) ->
+            case descriptor of
+                Param _ _ (Concatenate separator) -> split separator value
+                _ -> [value]
         Nothing -> []
         _ -> error $ "Parameter " ++ name ++ " is not a string"
 
@@ -95,7 +105,7 @@ getStringsParam params name =
 getNumberParam :: Params -> String -> Maybe Double
 getNumberParam params name =
     case Map.lookup name params of
-        Just (NumberParam value) -> Just value
+        Just (NumberParam _ value) -> Just value
         Nothing -> Nothing
         _ -> error $ "Parameter " ++ name ++ " is not a number"
 

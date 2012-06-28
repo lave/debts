@@ -13,7 +13,7 @@ descriptors = [
     ]
     
 
-addTests = test [
+makeAndGetTests = test [
     "test string" ~:
         Just "a" ~=? getStringParam params "string",
     "test number override" ~:
@@ -21,9 +21,9 @@ addTests = test [
     "test number no override" ~:
         Just 1 ~=? getNumberParam params "number1",
     "test string concatenate" ~:
-        Just "a;b;c" ~=? getStringParam params "strings"
---    "test strings" ~:
---        ["a", "b", "c"] ~?= getStringsParam params "strings"
+        Just "a;b;c" ~=? getStringParam params "strings",
+    "test strings" ~:
+        ["a", "b", "c"] ~?= getStringsParam params "strings"
     ]
     where
         params = makeParams descriptors [
@@ -36,5 +36,5 @@ addTests = test [
             ("strings", "b;c")
             ]
 
-tests = test [addTests]
+tests = test [makeAndGetTests]
 
