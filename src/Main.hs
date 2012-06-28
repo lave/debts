@@ -1,9 +1,10 @@
 module Main (main)
 where
 
-import System.Environment
-import Data.List
+import qualified System.Environment (getArgs)
+import qualified Data.List (sortBy)
 
+import qualified CommandLine
 import InputBuilder
 import Param
 import Money
@@ -18,32 +19,27 @@ import Round
 
 
 main = do
-    args <- getArgs
-    s <- readFile $ head args
+    args <- System.Environment.getArgs
+    let fileName = head args
+    let isVerbose = CommandLine.containsKey args "-v"
+    let parameters = CommandLine.findParameters args
+
+    s <- readFile fileName
     let tokens = alexScanTokens s
-    if (find (\s -> s == "-d") args /= Nothing)
-        then do
-            putStrLn "Tokens:"
-            putStrLn $ show tokens
-        else do
-            putStrLn ""
+    putStrLn $ if isVerbose then "Tokens:\n" ++ show tokens else ""
 
     case parse tokens of
-        Ok parsed -> process args parsed
-        Error s -> putStrLn ("Parse error:" ++ s)
+        Ok parsed -> do
+            putStrLn $ if isVerbose then "Syntax tree:\n" ++ show parsed else ""
+            printResults $ process parameters parsed
+        Error s ->
+            putStrLn ("Parse error:" ++ s)
 
 
-process args parsed = do
-    if (find (\s -> s == "-d") args /= Nothing)
-        then do
-            putStrLn "Syntax tree:"
-            putStrLn $ show parsed
-        else do
-            putStrLn ""
-
-    let input = buildInputData parsed
-    let result = process' input
-    printResults result
+process paramOverrides parsed =
+    process' $ Input (params ++ paramOverrides) groups fxs transactions
+    where
+        Input params groups fxs transactions = buildInputData parsed
 
 
 
@@ -65,7 +61,7 @@ process' (Input rawParams groups fxs transactions) = (balance', expenses')
         balance' = process' balance smartRound
         expenses' = process' expenses roundListTo
 
-        process' calculator rounder = sortBy compareSides rounded
+        process' calculator rounder = Data.List.sortBy compareSides rounded
             where
                 raw = calc calculator $ map (normalizeTransaction groups) transactions
                 converted = applyIfParamIsSet (convertSides fxs) targetCurrency raw
