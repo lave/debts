@@ -3,6 +3,7 @@ where
 
 import Test.HUnit
 
+import AggregationTest
 import CommandLineTest
 import DebtTest
 import FxTest
@@ -16,6 +17,7 @@ import UtilsTest
 
 
 allTests = TestList [
+        AggregationTest.tests,
         CommandLineTest.tests,
         DebtTest.tests,
         FxTest.tests,
