@@ -47,7 +47,7 @@ process paramOverrides parsed =
 parameterDescriptors = [
     Param "round.to" NumberParameter Override,
     Param "target.currency" StringParameter Override,
-    Param "aggregate" StringParameter (Concatenate ";")
+    Param "aggregate" StringParameter (Concatenate ",")
     ]
 
 

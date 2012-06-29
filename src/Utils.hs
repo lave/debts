@@ -1,7 +1,12 @@
-module Utils ( same, allSame, trimFirst, trimLast, trimBoth )
+module Utils (
+    same, allSame,
+    trimFirst, trimLast, trimBoth,
+    contains, split
+    )
 where
 
 import Data.List
+--import Data.List.Utils (contains, split)
 
 
 same :: Eq a => [a] -> [a] -> Bool
@@ -22,3 +27,15 @@ trimLast [x] = []
 trimLast (x : xs) = x : trimLast xs
 
 trimBoth = trimLast . trimFirst
+
+--contains = Data.List.Utils.contains
+--split = Data.List.Utils.split
+contains [x] xs = find (== x) xs /= Nothing
+
+split :: Eq a => a -> [a] -> [[a]]
+split _ [] = [[]]
+split s (x : xs)
+    | x == s = [] : r
+    | otherwise = (x : (head r)) : (tail r)
+    where
+        r = split s xs

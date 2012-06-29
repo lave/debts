@@ -10,7 +10,8 @@ Extra-source-files: testsute/test/RunTests.hs
 
 Executable debts
   Main-is:          Main.hs
-  Build-Depends:    base, array, containers, MissingH
+  --Build-Depends:    base, array, containers, MissingH
+  Build-Depends:    base, array, containers
   Hs-Source-Dirs:   src
   Other-Modules:    Aggregation CommandLine Date Debt Fx Lexer Main Money Param Postprocessing Parser Transaction Utils
 

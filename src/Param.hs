@@ -8,8 +8,9 @@ where
 import Data.List
 import Data.Maybe
 import Data.Map (Map)
-import Data.List.Utils (split)
 import qualified Data.Map as Map
+
+import Utils
 
 
 -- parameter type
@@ -96,7 +97,7 @@ getStringsParam params name =
     case Map.lookup name params of
         Just (StringParam descriptor value) ->
             case descriptor of
-                Param _ _ (Concatenate separator) -> split separator value
+                Param _ _ (Concatenate separator) -> split (head separator) value
                 _ -> [value]
         Nothing -> []
         _ -> error $ "Parameter " ++ name ++ " is not a string"

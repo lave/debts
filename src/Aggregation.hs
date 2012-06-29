@@ -1,44 +1,52 @@
 module Aggregation
 where
 
-import Data.List (find, groupBy, sort)
-import Data.List.Utils (contains, split)
+import Data.List (find, groupBy, sort, nub)
 import Data.Maybe
 
 import Money
 import Transaction
+import Utils
 
 
 type AggGroup = (String, [String])
 type AggGroups = [AggGroup]
 
 parseAggGroups :: [String] -> AggGroups
-parseAggGroups = map parseGroup . filter (contains "+")
+parseAggGroups groups
+    | isUnique r = r
+    | otherwise = error "names are not unique"
     where
-        parseGroup s = (s, split "+" s)
+        r =  map parseGroup $ filter (contains "+") groups
+        parseGroup s = (s, split '+' s)
+        isUnique groups = (length names) == (length $ nub names)
+            where
+                names = concat $ map snd groups
 
 
 aggregateTransaction :: AggGroups -> NormalizedTransaction -> NormalizedTransaction
-aggregateTransaction groups (Transaction payers beneficators sum date contragent category tags comment) = Transaction payers' beneficators' sum date contragent category tags comment
+aggregateTransaction groups transaction =
+    transaction { payers = payers', beneficators = beneficators' }
     where
-        payers' = aggregateSides groups payers
-        beneficators' = aggregateSides groups beneficators
+        payers' = aggregateSides groups $ payers transaction
+        beneficators' = aggregateSides groups $ beneficators transaction
 
-        aggregateSides groups sides
-            = map (foldl1 addSides)
-            $ groupBy (\s1 s2 -> compare s1 s2 == EQ)
-            $ sort
-            $ map (renameSide groups) sides
-            where
-                renameSide sides side@(Side name moneys) =
-                    case findGroup groups name of
-                        Just (groupName, _) -> Side groupName moneys
-                        Nothing -> side
-                findGroup groups name =
-                    find (groupContains name) groups
+aggregateSides :: AggGroups -> [Side] -> [Side]
+aggregateSides groups sides
+    = map (foldl1 addSides)
+    $ groupBy (\s1 s2 -> compare s1 s2 == EQ)
+    $ sort
+    $ map (renameSide groups) sides
+    where
+        renameSide sides side@(Side name moneys) =
+            case findGroup groups name of
+                Just (groupName, _) -> Side groupName moneys
+                Nothing -> side
+        findGroup groups name =
+            find (groupContains name) groups
 
-                groupContains :: String -> AggGroup -> Bool
-                groupContains name (groupName, names) =
-                    contains [name] names
-                addSides (Side name1 moneys1) (Side name2 moneys2)
-                    | name1 == name2 = Side name1 $ add moneys1 moneys2
+        groupContains :: String -> AggGroup -> Bool
+        groupContains name (groupName, names) =
+            contains [name] names
+        addSides (Side name1 moneys1) (Side name2 moneys2)
+            | name1 == name2 = Side name1 $ add moneys1 moneys2
