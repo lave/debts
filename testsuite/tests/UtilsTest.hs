@@ -33,7 +33,23 @@ testTrim = test [
     "trim both two" ~: "" ~=? trimBoth "ab",
     "trim both many" ~: "b" ~=? trimBoth "abc"
     ]
+
+
+testContains = test [
+    "contsins" ~: contains [1] [1, 2, 3] ~? "",
+    "does not contsin" ~: not (contains [1] [2, 3]) ~? ""
+    ]
         
 
-tests = test [testSame, testTrim]
+testSplit = test [
+    "empty string" ~: [""] ~=? split ',' "",
+    "empty string" ~: ["a"] ~=? split ',' "a",
+    "empty string" ~: ["", "a"] ~=? split ',' ",a",
+    "empty string" ~: ["a", ""] ~=? split ',' "a,",
+    "empty string" ~: ["a", "", "b"] ~=? split ',' "a,,b",
+    "empty string" ~: ["a", "b", "c"] ~=? split ',' "a,b,c"
+    ]
+
+
+tests = test [testSame, testTrim, testContains, testSplit]
 
