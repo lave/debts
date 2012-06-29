@@ -35,21 +35,5 @@ testTrim = test [
     ]
 
 
-testContains = test [
-    "contsins" ~: contains [1] [1, 2, 3] ~? "",
-    "does not contsin" ~: not (contains [1] [2, 3]) ~? ""
-    ]
-        
-
-testSplit = test [
-    "empty string" ~: [""] ~=? split ',' "",
-    "empty string" ~: ["a"] ~=? split ',' "a",
-    "empty string" ~: ["", "a"] ~=? split ',' ",a",
-    "empty string" ~: ["a", ""] ~=? split ',' "a,",
-    "empty string" ~: ["a", "", "b"] ~=? split ',' "a,,b",
-    "empty string" ~: ["a", "b", "c"] ~=? split ',' "a,b,c"
-    ]
-
-
-tests = test [testSame, testTrim, testContains, testSplit]
+tests = test [testSame, testTrim]
 

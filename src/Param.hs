@@ -97,7 +97,7 @@ getStringsParam params name =
     case Map.lookup name params of
         Just (StringParam descriptor value) ->
             case descriptor of
-                Param _ _ (Concatenate separator) -> split (head separator) value
+                Param _ _ (Concatenate separator) -> split separator value
                 _ -> [value]
         Nothing -> []
         _ -> error $ "Parameter " ++ name ++ " is not a string"

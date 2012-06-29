@@ -13,10 +13,10 @@ parseAggGroupTest = test [
         []
         ~=? parseAggGroups ["a"],
     "group of several members" ~:
-        [("a+b+c", ["a", "b", "c"])]
+        [AggGroup "a+b+c" ["a", "b", "c"]]
         ~=? parseAggGroups ["a+b+c"],
     "several groups" ~:
-        [("a+b", ["a", "b"]), ("c+d", ["c", "d"])]
+        [AggGroup "a+b" ["a", "b"], AggGroup "c+d" ["c", "d"]]
         ~=? parseAggGroups ["a+b", "c+d"]
     {- must generate error
     "one memeber in several groups" ~:
@@ -39,10 +39,10 @@ aggregateSidesTest = test [
     ]
     where
         aggGroups = [
-            ("g1", ["a", "b"]),
-            ("g2", ["c", "d"]),
-            ("g3", ["e"]),
-            ("g4", ["f", "g"])]
+            AggGroup "g1" ["a", "b"],
+            AggGroup "g2" ["c", "d"],
+            AggGroup "g3" ["e"],
+            AggGroup "g4" ["f", "g"]]
 
 
 tests = test [parseAggGroupTest, aggregateSidesTest]
