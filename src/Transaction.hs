@@ -51,11 +51,19 @@ type RawTransaction = Transaction_ RawSide
 data Group = Group String [RawSide]
     deriving (Show, Eq)
 
-data Side = Side String Moneys deriving (Show, Eq)
+data Side = Side String Moneys
+    deriving (Show, Eq)
+instance Ord Side where
+    compare (Side name1 _) (Side name2 _) = compare name1 name2
+
 type NormalizedTransaction = Transaction_ Side
 
 
 
+-- simply replace each group with sides it consists of:
+--
+-- group 1 = a, b, c
+-- a, d, 1, e -> a, d, a, b, c, e
 expandGroups :: [Group] -> [RawSide] -> [RawSide]
 expandGroups groups sides =
     concat $ map expandGroup sides
@@ -70,6 +78,7 @@ expandGroups groups sides =
         expandGroup side = [side]
 
 
+-- perform side operations - remove or override sides, check that every side is included only once
 processSides :: [RawSide] -> [RawSide]
 processSides sides =
     reverse $ foldl processSideOperations [] sides
@@ -88,6 +97,7 @@ processSides sides =
         
 
 
+-- determine effective sum and split it between sides according to factors etc
 normalizeSides :: Maybe Moneys -> [RawSide] -> [RawSide] -> (Moneys, [Side], [Side])
 normalizeSides sum payers beneficators = (sum', payers', beneficators')
     where
@@ -142,5 +152,3 @@ normalizeTransaction groups (Transaction payers beneficators sum date contragent
         (sum', payers', beneficators') = normalizeSides sum
             (processSides $ expandGroups groups payers)
             (processSides $ expandGroups groups beneficators)
-
-

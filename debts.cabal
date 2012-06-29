@@ -12,7 +12,7 @@ Executable debts
   Main-is:          Main.hs
   Build-Depends:    base, array, containers, MissingH
   Hs-Source-Dirs:   src
-  Other-Modules:    CommandLine Date Debt Fx Lexer Main Money Param Postprocessing Parser Transaction Utils
+  Other-Modules:    Aggregation CommandLine Date Debt Fx Lexer Main Money Param Postprocessing Parser Transaction Utils
 
 Test-Suite unit-tests
   Type:             exitcode-stdio-1.0

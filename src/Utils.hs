@@ -22,4 +22,3 @@ trimLast [x] = []
 trimLast (x : xs) = x : trimLast xs
 
 trimBoth = trimLast . trimFirst
-

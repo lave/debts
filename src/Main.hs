@@ -2,8 +2,9 @@ module Main (main)
 where
 
 import qualified System.Environment (getArgs)
-import qualified Data.List (sortBy)
+import qualified Data.List (sort)
 
+import Aggregation
 import qualified CommandLine
 import InputBuilder
 import Param
@@ -57,20 +58,21 @@ process' (Input rawParams groups fxs transactions) = (balance', expenses')
         params = makeParams parameterDescriptors rawParams
         targetCurrency = getStringParam params "target.currency"
         roundTo = getNumberParam params "round.to"
+        outGroups = parseAggGroups $ getStringsParam params "aggregate"
 
         balance' = process' balance smartRound
         expenses' = process' expenses roundListTo
 
-        process' calculator rounder = Data.List.sortBy compareSides rounded
+        process' calculator rounder = Data.List.sort rounded
             where
-                raw = calc calculator $ map (normalizeTransaction groups) transactions
+                raw = calc calculator
+                    $ map (aggregateTransaction outGroups)
+                    $ map (normalizeTransaction groups) transactions
                 converted = applyIfParamIsSet (convertSides fxs) targetCurrency raw
                 rounded = applyIfParamIsSet (roundSides rounder) roundTo converted
 
                 applyIfParamIsSet f (Just x) a = f x a
                 applyIfParamIsSet _ Nothing a = a
-                
-                compareSides (Side n1 _) (Side n2 _) = compare n1 n2
 
 
 convertSides fxs c sides = map (convertSide fxs c) sides
