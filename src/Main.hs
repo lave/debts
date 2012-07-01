@@ -80,15 +80,33 @@ convertSides fxs c sides = map (convertSide fxs c) sides
         convertSide fxs c (Side n m) = Side n $ convert fxs c m
 
 
-printResults (balance, expenses) = do
-    putStrLn $ show balance
-    putStrLn $ show expenses
-    let sides = balance
-    sequence_ $ map printResult sides
-    putStrLn "----------------"
-    let sum = foldl Money.add (Moneys []) $ [m | (Side _ m) <- sides]
-    printResult $ Side "Total" $ sum
+padRight n s
+    | l > n = (take (n - 3) s) ++ "..."
+    | otherwise = s ++ (replicate (n - l) ' ')
     where
-        printResult (Side n m) = do
-            putStrLn $ n ++ ":\t " ++ (show m)
+        l = length s
+
+padLeft n s
+    | l > n = padRight n s
+    | otherwise = (replicate (n - l) ' ') ++ s
+    where
+        l = length s
+
+
+printResults (balance, expenses) = do
+    let sides = zip balance expenses
+    let total = sums balance expenses
+    putStrLn $ (padRight 20 "name") ++ (padRight 20 "balance") ++ (padRight 20 "expenses")
+    putStrLn (replicate 60 '-')
+    sequence_ $ map printResult sides
+    putStrLn (replicate 60 '-')
+    printResult total
+    where
+        printResult (Side name balance, Side name1 expenses)
+            | name == name1 = do
+                putStrLn $ (padRight 20 name) ++ (padLeft 20 $ show balance) ++ (padLeft 20 $ show expenses)
+        sums balance expenses =
+            (Side "Total" (sum balance), Side "Total" (sum expenses))
+        sum sides =
+            foldl Money.add (Moneys []) $ [m | (Side _ m) <- sides]
 

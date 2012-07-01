@@ -11,12 +11,11 @@ Extra-source-files: testsute/test/RunTests.hs
 Executable debts
   Main-is:          Main.hs
   Build-Depends:    base, array, containers, MissingH
-  --Build-Depends:    base, array, containers
   Hs-Source-Dirs:   src
   Other-Modules:    Aggregation CommandLine Date Debt Fx Lexer Main Money Param Postprocessing Parser Transaction Utils
 
-Test-Suite unit-tests
+Test-Suite tests
+  Main-Is:          RunTests.hs
   Type:             exitcode-stdio-1.0
   Hs-Source-Dirs:   testsuite/tests src dist/build/debts/debts-tmp
-  Build-Depends:    base, array, HUnit
-  Main-Is:          RunTests.hs
+  Build-Depends:    base, array, containers, HUnit, MissingH
