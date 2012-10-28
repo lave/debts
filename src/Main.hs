@@ -38,11 +38,22 @@ main = do
 
 
 process paramOverrides parsed =
-    process' $ Input (params ++ paramOverrides) groups fxs transactions
-    where
-        Input params groups fxs transactions = buildInputData parsed
+    postprocess $ process $ preprocess $ addParamsOverrides paramsOVerride $ buildInputData parsed
+
+addParamsOverrides paramsOverrides (Input params, groups, fxs, transactions) =
+    Input (params ++ paramOverrides) groups fxs transactions
+
+preprocess :: Input -> Input
+preprocess = filter . aggregate . convert . normalize
 
 
+process :: Input -> Output
+process input =
+    (balance, expenses, log)
+
+postprocess :: Output -> Output
+postprocess output =
+    round
 
 parameterDescriptors = [
     Param "round.to" NumberParameter Override,
