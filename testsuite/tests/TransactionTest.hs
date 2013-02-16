@@ -6,6 +6,7 @@ import Test.HUnit
 import Utils
 import Money
 import Transaction
+import Normalize
 
 
 
