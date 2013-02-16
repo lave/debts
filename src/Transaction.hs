@@ -1,21 +1,10 @@
 module Transaction
 where
 
-import Data.List
 import Data.Maybe
 
 import Date
 import Utils
-import Money
-
-
-data RawSide =
-      RawSide String
-    | RawSideWithFactor String Double
-    | RawSideWithMoney String Moneys
-    | RawSideRemove String
-    | RawSideOverride RawSide
-    deriving (Show, Eq)
 
 
 data Contragent =
@@ -46,14 +35,7 @@ data Transaction_ side = Transaction {
     
 
 type RawTransaction = Transaction_ RawSide
-
+type NormalizedTransaction = Transaction_ Side
 
 data Group = Group String [RawSide]
     deriving (Show, Eq)
-
-data Side = Side String Moneys
-    deriving (Show, Eq)
-instance Ord Side where
-    compare (Side name1 _) (Side name2 _) = compare name1 name2
-
-type NormalizedTransaction = Transaction_ Side

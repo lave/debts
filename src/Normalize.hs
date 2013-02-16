@@ -1,9 +1,10 @@
-module Normalize
+module Normalize (normalizeTransaction)
 where
 
 import Data.List
 import Data.Maybe
 
+import Side
 import Transaction
 
 
@@ -60,26 +61,14 @@ normalizeSides sum payers beneficators = (sum', payers', beneficators')
         getMoneysOnlyIfAllHasMoneys sides
             | all hasMoney sides = Just $ sumMoney sides
             | otherwise = Nothing
-            where
-                hasMoney (RawSideWithMoney _ _) = True
-                hasMoney _ = False
 
         sumFactors :: [RawSide] -> Double
         sumFactors sides =
             Data.List.sum $ map getFactor sides
-            where
-                getFactor (RawSide _) = 1
-                getFactor (RawSideWithFactor _ factor) = factor
-                getFactor (RawSideWithMoney _ _) = 0
-
 
         sumMoney:: [RawSide] -> Moneys
         sumMoney sides =
             foldl add (Moneys []) $ map getMoney sides
-            where
-                getMoney (RawSideWithMoney _ money) = money
-                getMoney _ = Moneys []
-
 
         splitSum :: [RawSide] -> Moneys -> [Side]
         splitSum sides sum = map makeSide sides

@@ -19,6 +19,12 @@ import Postprocessing
 import Round
 
 
+parameterDescriptors = [
+    Param "round.to" NumberParameter Override,
+    Param "target.currency" StringParameter Override,
+    Param "aggregate" StringParameter (Concatenate ",")
+    ]
+
 main = do
     args <- System.Environment.getArgs
     let fileName = head args
@@ -37,39 +43,32 @@ main = do
             putStrLn ("Parse error:" ++ s)
 
 
-process paramOverrides parsed =
-    postprocess $ process $ preprocess $ addParamsOverrides paramsOVerride $ buildInputData parsed
+process paramOverrides (Input rawParams, groups, fxs, transactions) =
+    postprocessed
+    where
+        params = makeParams parameterDescriptors $ rawParams ++ paramOverrides
+        preprocessed = filter params
+            $ aggregate (parseAggGroups $ getStringsParam params "aggregate")
+            $ convert (getStringParam params "target.currency") fxs
+            $ normalize groups transactions
+        processed = process' params preprocessed
+        postprocessed = round (getNumberParam params "round.to") processed
+        
+        normalize groups =
+            map (normalizeTransaction groups)
 
-addParamsOverrides paramsOverrides (Input params, groups, fxs, transactions) =
-    Input (params ++ paramOverrides) groups fxs transactions
+        convert targetCurrency fxs transactions = 
+            applyIfParamIsSet (convertSides fxs) 
 
-preprocess :: Input -> Input
-preprocess = filter . aggregate . convert . normalize
+        aggregate outGroups =
+            map (aggregateTransaction outGroups)
+    
 
-
-process :: Input -> Output
-process input =
-    (balance, expenses, log)
-
-postprocess :: Output -> Output
-postprocess output =
-    round
-
-parameterDescriptors = [
-    Param "round.to" NumberParameter Override,
-    Param "target.currency" StringParameter Override,
-    Param "aggregate" StringParameter (Concatenate ",")
-    ]
-
-
-process' :: Input -> ([Side], [Side])
+process' :: [NormalizedTransaction] -> [(Side, Side, Side, Log)]
+process 
 
 process' (Input rawParams groups fxs transactions) = (balance', expenses')
     where
-        params = makeParams parameterDescriptors rawParams
-        targetCurrency = getStringParam params "target.currency"
-        roundTo = getNumberParam params "round.to"
-        outGroups = parseAggGroups $ getStringsParam params "aggregate"
 
         balance' = process' balance smartRound
         expenses' = process' expenses roundListTo
@@ -82,8 +81,8 @@ process' (Input rawParams groups fxs transactions) = (balance', expenses')
                 converted = applyIfParamIsSet (convertSides fxs) targetCurrency raw
                 rounded = applyIfParamIsSet (roundSides rounder) roundTo converted
 
-                applyIfParamIsSet f (Just x) a = f x a
-                applyIfParamIsSet _ Nothing a = a
+applyIfParamIsSet f (Just x) a = f x a
+applyIfParamIsSet _ Nothing a = a
 
 
 convertSides fxs c sides = map (convertSide fxs c) sides
