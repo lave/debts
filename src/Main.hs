@@ -16,6 +16,7 @@ import Lexer
 import Transaction
 import Fx
 import Postprocessing
+import Result
 import Round
 
 
@@ -52,7 +53,8 @@ process paramOverrides (Input rawParams, groups, fxs, transactions) =
             $ convert (getStringParam params "target.currency") fxs
             $ normalize groups transactions
         processed = process' params preprocessed
-        postprocessed = round (getNumberParam params "round.to") processed
+        --postprocessed = round (getNumberParam params "round.to") processed
+        postprocessed = processed
         
         normalize groups =
             map (normalizeTransaction groups)
@@ -64,22 +66,23 @@ process paramOverrides (Input rawParams, groups, fxs, transactions) =
             map (aggregateTransaction outGroups)
     
 
-process' :: [NormalizedTransaction] -> [(Side, Side, Side, Log)]
-process 
+process' :: Params -> [NormalizedTransaction] -> Result
+process' params transactions =
+    if hasParam params "log"
+        then Log ""
+        else Balance $ process'' params transactions
+    
 
-process' (Input rawParams groups fxs transactions) = (balance', expenses')
+
+process'' params transactions = zip balance', expenses'
     where
-
         balance' = process' balance smartRound
         expenses' = process' expenses roundListTo
 
         process' calculator rounder = Data.List.sort rounded
             where
-                raw = calc calculator
-                    $ map (aggregateTransaction outGroups)
-                    $ map (normalizeTransaction groups) transactions
-                converted = applyIfParamIsSet (convertSides fxs) targetCurrency raw
-                rounded = applyIfParamIsSet (roundSides rounder) roundTo converted
+                raw = calc calculator transactions
+                rounded = applyIfParamIsSet (roundSides rounder) (getNumberParam params "round.to") converted
 
 applyIfParamIsSet f (Just x) a = f x a
 applyIfParamIsSet _ Nothing a = a
@@ -103,9 +106,8 @@ padLeft n s
         l = length s
 
 
-printResults (balance, expenses) = do
-    let sides = zip balance expenses
-    let total = sums balance expenses
+printResults Result sides = do
+    let total = sums $ unzip balance expenses
     putStrLn $ (padRight 20 "name") ++ (padRight 20 "balance") ++ (padRight 20 "expenses")
     putStrLn (replicate 60 '-')
     sequence_ $ map printResult sides
@@ -115,7 +117,8 @@ printResults (balance, expenses) = do
         printResult (Side name balance, Side name1 expenses)
             | name == name1 = do
                 putStrLn $ (padRight 20 name) ++ (padLeft 20 $ show balance) ++ (padLeft 20 $ show expenses)
-        sums balance expenses =
+
+        sums (balance, expenses) =
             (Side "Total" (sum balance), Side "Total" (sum expenses))
         sum sides =
             foldl Money.add (Moneys []) $ [m | (Side _ m) <- sides]

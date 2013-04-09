@@ -110,3 +110,6 @@ getNumberParam params name =
         Nothing -> Nothing
         _ -> error $ "Parameter " ++ name ++ " is not a number"
 
+hasParam :: Params -> String -> Bool
+hasParam params name =
+    Map.contains name params
