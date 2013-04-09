@@ -4,6 +4,7 @@ where
 import Data.List
 import Data.Maybe
 
+import Money
 import Side
 import Transaction
 

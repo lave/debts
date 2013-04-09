@@ -2,10 +2,10 @@ module Debt (calc, balance, expenses, addSides, subSides)
 where
 
 import Money
+import Side
 import Transaction
 
 
-calc :: ([Side] -> NormalizedTransaction -> [Side]) -> [NormalizedTransaction] -> [Side]
 calc f transactions =
     foldl f [] transactions
 
