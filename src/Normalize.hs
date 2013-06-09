@@ -81,7 +81,7 @@ normalizeSides sum payers beneficators = (sum', payers', beneficators')
                 makeSide (RawSideWithMoney name money) = Side name money
 
 
-normalizeTransaction :: [Group] -> RawTransaction -> NormalizedTransaction
+normalizeTransaction :: [Group] -> RawTransaction -> Transaction
 normalizeTransaction groups (Transaction payers beneficators sum date contragent category tags comment) =
     Transaction
         payers' beneficators' (Just sum') date contragent category tags comment

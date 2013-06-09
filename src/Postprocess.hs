@@ -1,10 +1,11 @@
-module Postprocessing ( roundSides )
+module Postprocess ( roundSides )
 where
 
 import Data.Maybe
 
 import Money
 import Round
+import Side
 import Transaction
 import Utils
 

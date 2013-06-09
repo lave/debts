@@ -11,3 +11,4 @@ data Result =
     deriving Eq
 
 data Log = Log String
+    deriving Eq

@@ -1,13 +1,14 @@
 module Param (
     ParamType(..), ParamAggType(..), ParamDescriptor(..),
     RawParam,
+    Params,
     makeParams,
+    hasParam,
     getStringParam, getStringsParam, getNumberParam)
 where
 
 import Data.List
 import Data.Maybe
-import Data.Map (Map)
 import qualified Data.Map as Map
 
 import Utils
@@ -37,7 +38,7 @@ data ParamDescriptor = Param {
 concatStrings separator = \s1 s2 -> s1 ++ separator ++ s2
 
 type RawParam = (String, String)
-type RawParams = Map String String
+type RawParams = Map.Map String String
 
 
 getDescriptor :: [ParamDescriptor] -> String -> ParamDescriptor
@@ -64,7 +65,7 @@ data Param =
       StringParam ParamDescriptor String
     | NumberParam ParamDescriptor Double
     deriving (Eq, Show)
-type Params = Map String Param
+type Params = Map.Map String Param
 
 parseParams :: [ParamDescriptor] -> RawParams -> Params
 parseParams descriptors params =
@@ -110,6 +111,6 @@ getNumberParam params name =
         Nothing -> Nothing
         _ -> error $ "Parameter " ++ name ++ " is not a number"
 
-hasParam :: Params -> String -> Bool
-hasParam params name =
-    Map.contains name params
+hasParam :: String -> Params -> Bool
+hasParam name params =
+    Map.member name params

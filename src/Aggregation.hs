@@ -5,6 +5,7 @@ import Data.List (find, groupBy, sort, nub, (\\), intercalate)
 import Data.Maybe
 
 import Money
+import Side
 import Transaction
 import Utils
 
@@ -27,12 +28,13 @@ parseAggGroups groups
         names = concatMap groupNames parsedGroups
 
 
-aggregateTransaction :: AggGroups -> NormalizedTransaction -> NormalizedTransaction
+aggregateTransaction :: AggGroups -> Transaction -> Transaction
 aggregateTransaction groups transaction =
     transaction { payers = payers', beneficators = beneficators' }
     where
         payers' = aggregateSides groups $ payers transaction
         beneficators' = aggregateSides groups $ beneficators transaction
+
 
 aggregateSides :: AggGroups -> [Side] -> [Side]
 aggregateSides groups sides
