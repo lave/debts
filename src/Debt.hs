@@ -9,13 +9,13 @@ import Transaction
 calc f transactions =
     foldl f [] transactions
 
-balance :: [Side] -> NormalizedTransaction -> [Side]
+balance :: [Side] -> Transaction -> [Side]
 balance sides transaction =
     sides
         `addSides` (payers transaction)
         `subSides` (beneficators transaction)
 
-expenses :: [Side] -> NormalizedTransaction -> [Side]
+expenses :: [Side] -> Transaction -> [Side]
 expenses sides transaction
     | isInternal transaction = sides
     | otherwise = sides `addSides` (beneficators transaction)

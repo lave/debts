@@ -37,7 +37,10 @@ data Transaction_ side = Transaction {
     
 
 type RawTransaction = Transaction_ RawSide
-type NormalizedTransaction = Transaction_ Side
+type Transaction = Transaction_ Side
+
+type RawTransactions = [RawTransaction]
+type Transactions = [Transaction]
 
 data Group = Group String [RawSide]
     deriving (Show, Eq)

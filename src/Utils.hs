@@ -1,7 +1,8 @@
 module Utils (
     same, allSame,
     trimFirst, trimLast, trimBoth,
-    contains, split
+    contains, split,
+    (Utils.>>)
     )
 where
 
@@ -33,3 +34,6 @@ contains = Data.List.Utils.contains
 
 split :: Eq a => [a] -> [a] -> [[a]]
 split = Data.List.Utils.split
+
+--  fancy 'pipe' operator
+a >> f = f a

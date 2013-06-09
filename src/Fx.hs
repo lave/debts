@@ -1,11 +1,13 @@
-module Fx ( Fx(..), Fx.add, convert )
+module Fx (Fx(..), Fxs, Fx.add, convert)
 where
 
 import Money
 import Utils
-import Data.List
+
 
 data Fx = Fx Money Money deriving (Eq, Show)
+
+type Fxs = [Fx]
 
 
 make m1@(Money q1 c1) m2@(Money q2 c2) = Fx m1 m2

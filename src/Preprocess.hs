@@ -1,33 +1,40 @@
-module Preprocess ( roundSides )
+module Preprocess
 where
 
 import Data.Maybe
 
 import Aggregation
+import Fx
+import Normalize
 import Round
+import Side
 import Transaction
-import Utils
-
-data NormalizedInput =
-    NormalizedInput [RawParam] [Group] [Fx] [NormalizedTransaction]
-
-normalize :: Input -> NormalizedInput
-normalize Input params groups fxs transactions =
-    Input params fxs groups $ map (normalizeTransaction groups) transactions
 
 
-aggregate :: NormalizedInput -> NormalizedInput
-aggregate Input params groups fxs transactions =
-    Input params fxs groups $ map (aggregateTransaction outGroups) transactions
-    where
-        outGroups = parseAggGroups $ getStringsParam params "aggregate"
+normalize :: [Group] -> RawTransactions -> Transactions
+normalize groups transactions =
+    map (normalizeTransaction groups) transactions
 
-filter :: NormalizedInput -> NormalizedInput
+
+--  isn't implemented yet
+filter :: Transactions -> Transactions
 filter = id
 
-convert :: NormalizedInput -> NormalizedInput
-convert Input params groups fxs transactions =
-    applyIfParamIsSet (convertSides fxs) targetCurrency raw
+
+aggregate :: AggGroups -> Transactions -> Transactions
+aggregate aggGroups transactions =
+    map (aggregateTransaction aggGroups) transactions
+
+
+convert :: Fxs -> Maybe String -> Transactions -> Transactions
+convert fxs currency transactions
+    | isNothing currency = transactions
+    | otherwise = map convertTransaction transactions
     where
-        targetCurrency = getStringParam params "target.currency"
-    Input params fxs groups $ map (convertTransaction fxs) transactions
+        convertTransaction t = t {
+            payers = map convertSide $ payers t,
+            beneficators = map convertSide $ beneficators t
+        }
+
+        convertSide (Side name money) =
+            Side name $ Fx.convert fxs (fromJust currency) money

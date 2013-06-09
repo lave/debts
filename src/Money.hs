@@ -1,5 +1,7 @@
-module Money ( Money(..), Moneys(..), add, mul, sub )
+module Money
 where
+
+import Text.Printf
 
 import Utils
 
@@ -11,8 +13,10 @@ data Money = Money Double String
 newtype Moneys = Moneys [Money]
 
 instance Show Money where
-    show (Money q c) = show q ++ " " ++ c
-    show (Sum q) = show q
+    show (Money q c) = showNumber q ++ " " ++ c
+    show (Sum q) = showNumber q
+
+showNumber = printf "%.2f"
 
 instance Show Moneys where
     show (Moneys []) = "0"
@@ -44,4 +48,3 @@ mul f (Moneys l) = Moneys $ map (mul' f) l where
 
 sub :: Moneys -> Moneys -> Moneys
 sub l r = add l $ mul (-1) r
-
