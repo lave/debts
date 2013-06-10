@@ -2,12 +2,12 @@ module Utils (
     same, allSame,
     trimFirst, trimLast, trimBoth,
     contains, split,
-    (Utils.>>)
+    (|>)
     )
 where
 
 import Data.List
-import qualified Data.List.Utils (contains, split)
+import qualified Data.List.Utils (split)
 
 
 same :: Eq a => [a] -> [a] -> Bool
@@ -30,10 +30,11 @@ trimLast (x : xs) = x : trimLast xs
 trimBoth = trimLast . trimFirst
 
 contains :: Eq a => [a] -> [a] -> Bool
-contains = Data.List.Utils.contains
+contains = Data.List.isInfixOf
 
 split :: Eq a => [a] -> [a] -> [[a]]
 split = Data.List.Utils.split
 
 --  fancy 'pipe' operator
-a >> f = f a
+--a |> f = f a
+(|>) = flip ($)
