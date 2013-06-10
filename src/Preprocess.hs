@@ -9,6 +9,7 @@ import Normalize
 import Round
 import Side
 import Transaction
+import Param
 
 
 normalize :: [Group] -> RawTransactions -> Transactions
@@ -17,20 +18,23 @@ normalize groups transactions =
 
 
 --  isn't implemented yet
-filter :: Transactions -> Transactions
-filter = id
+filter :: Params -> Transactions -> Transactions
+filter _ = id
 
 
-aggregate :: AggGroups -> Transactions -> Transactions
-aggregate aggGroups transactions =
+aggregate :: Params -> Transactions -> Transactions
+aggregate params transactions =
     map (aggregateTransaction aggGroups) transactions
+    where
+        aggGroups = parseAggGroups $ getStringsParam params "aggregate"
 
 
-convert :: Fxs -> Maybe String -> Transactions -> Transactions
-convert fxs currency transactions
+convert :: Params -> Fxs -> Transactions -> Transactions
+convert params fxs transactions
     | isNothing currency = transactions
     | otherwise = map convertTransaction transactions
     where
+        currency = getStringParam params "target.currency"
         convertTransaction t = t {
             payers = map convertSide $ payers t,
             beneficators = map convertSide $ beneficators t

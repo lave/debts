@@ -2,17 +2,13 @@ module Main (main)
 where
 
 import qualified System.Environment (getArgs)
-import qualified Data.List (sort)
 
-import Aggregation
 import qualified CommandLine
 import InputBuilder
 import Param
 import Parser
 import ParserMonad
 import Lexer
-import Transaction
-import Side
 import qualified Preprocess
 import qualified Process
 import qualified Postprocess
@@ -51,18 +47,13 @@ process paramOverrides (Input rawParams groups fxs transactions) =
         params = makeParams parameterDescriptors $ rawParams ++ paramOverrides
 
         preprocessed = transactions
-            Utils.>> Preprocess.normalize groups
-            Utils.>> Preprocess.filter
-            Utils.>> Preprocess.aggregate (parseAggGroups $ getStringsParam params "aggregate")
-            Utils.>> Preprocess.convert fxs (getStringParam params "target.currency")
+            |> Preprocess.normalize groups
+            |> Preprocess.filter params
+            |> Preprocess.aggregate params
+            |> Preprocess.convert params fxs 
 
-        processed = Process.process (getOperation params) preprocessed
+        processed = preprocessed
+            |> Process.process params
 
-        --postprocessed = round (getNumberParam params "round.to") processed
         postprocessed = processed
-        
-
-getOperation :: Params -> Process.Operation
-getOperation params
-    | hasParam "log" params = Process.Log
-    | otherwise = Process.Balance
+            |> Postprocess.round params

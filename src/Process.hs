@@ -1,9 +1,10 @@
-module Process
+module Process (process)
 where
 
-import Transaction
 import Debt
+import Param
 import qualified Result
+import Transaction
 
 
 data Operation =
@@ -11,11 +12,20 @@ data Operation =
     | Log
 
 
-process :: Operation -> Transactions -> Result.Result
-process Balance transactions = Result.Balances $ zip balance' expenses'
+getOperation :: Params -> Operation
+getOperation params
+    | hasParam "log" params = Log
+    | otherwise = Balance
+
+
+process :: Params -> Transactions -> Result.Result
+process params transactions = process' (getOperation params) transactions
+    
+
+process' Balance transactions = Result.Balances $ zip balance' expenses'
     where
         balance' = calc balance transactions
         expenses' = calc expenses transactions
 
 --  not implemented yet
-process Log transactions = Result.Logs []
+process' Log transactions = Result.Logs []

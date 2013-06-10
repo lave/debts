@@ -1,13 +1,35 @@
-module Postprocess ( roundSides )
+module Postprocess (roundSides, Postprocess.round)
 where
 
 import Data.Maybe
 
 import Money
+import Param
 import Round
+import Result
 import Side
 import Transaction
 import Utils
+
+
+round :: Params -> Result -> Result
+round params result
+    | base == Nothing = result
+    | otherwise = round' (fromJust base) result
+    where
+        base = getNumberParam params "round.to"
+
+
+round' base (Balances sides) =
+    Balances $ zip
+        (roundSides smartRound base balances)
+        (roundSides roundListTo base expences)
+    where
+        (balances, expences) = unzip sides
+
+
+--  no rounding for Log
+round' _ result@(Logs _) = result
 
 
 roundSides :: (Double -> [Double] -> [Double]) -> Double -> [Side] -> [Side]
