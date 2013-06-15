@@ -5,7 +5,7 @@ import Test.HUnit
 
 import Data.Maybe
 
-import Date
+import BasicTypes
 import Fx
 import InputBuilder
 import Money
@@ -13,6 +13,7 @@ import Param
 import Parser
 import ParserMonad
 import Transaction
+import Side
 import Utils
 
 
@@ -144,13 +145,13 @@ parseTransactionsTest = test [
         Just [transaction]
         ~=? parseTransactions "A > 50 > B ()",
     "category" ~:
-        Just [transaction { category = [Category "category"] }]
+        Just [transaction { category = Category ["category"] }]
         ~=? parseTransactions "A > 50 > B (category)",
     "multiword category" ~:
-        Just [transaction { category = [Category "long category"] }]
+        Just [transaction { category = Category ["long category"] }]
         ~=? parseTransactions "A > 50 > B (\"long category\")",
     "hieracical category" ~:
-        Just [transaction { category = [Category "category", Category "sub category"] }]
+        Just [transaction { category = Category ["category", "sub category"] }]
         ~=? parseTransactions "A > 50 > B (category, \"sub category\")",
 
     "empty tags" ~:
@@ -172,7 +173,7 @@ parseTransactionsTest = test [
     "all together - different orders" ~:
         Just (replicate 6 transaction {
             contragent = Just $ Contragent "shop",
-            category = [Category "food"],
+            category = Category ["food"],
             tags = [Tag "austria"],
             comment = Just $ Comment "comment" })
         ~=? parseTransactions
@@ -217,7 +218,7 @@ parseTransactionsTest = test [
     where
         transaction = Transaction
             [RawSide "A"] [RawSide "B"] (Just $ Moneys [Sum 50])
-            Nothing Nothing [] [] Nothing
+            Nothing Nothing (Category []) [] Nothing
 
 
 parseParameters s = do

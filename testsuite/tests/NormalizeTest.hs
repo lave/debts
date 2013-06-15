@@ -1,10 +1,11 @@
-module TransactionTest
+module NormalizeTest
 where
 
 import Test.HUnit
 
 import Utils
 import Money
+import Side
 import Transaction
 import Normalize
 

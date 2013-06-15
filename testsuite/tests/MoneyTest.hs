@@ -5,6 +5,34 @@ import Test.HUnit
 import Money
 
 
+emptyTests = TestList [
+    "empty" ~:
+        empty (Moneys []) ~? "",
+    "not empty" ~:
+        not (empty (Moneys [Sum 10])) ~? "",
+    "not empty" ~:
+        not (empty (Moneys [Money 10 "RUR"])) ~? ""
+    ]
+
+
+equalTests = TestList[
+    "both empty" ~:
+        Moneys [] == Moneys [] ~? "",
+    "both same" ~:
+        Moneys [Sum 10, Money 10 "RUR"] == Moneys [Sum 10, Money 10 "RUR"] ~? "",
+    "both same but have different order" ~:
+        Moneys [Sum 10, Money 10 "RUR"] == Moneys [Money 10 "RUR", Sum 10] ~? "",
+    "empty and non-empty" ~:
+        Moneys [] /= Moneys [Sum 10] ~? "",
+    "with currency and without currency" ~:
+        Moneys [Money 10 "RUR"] /= Moneys [Sum 10] ~? "",
+    "different quantity" ~:
+        Moneys [Money 10 "RUR"] /= Moneys [Money 5 "RUR"] ~? "",
+    "different currency" ~:
+        Moneys [Money 10 "RUR"] /= Moneys [Money 10 "EUR"] ~? ""
+    ]
+
+
 addTests = TestList [
     "empty + empty" ~:
         (Moneys []) ~=?
@@ -39,10 +67,10 @@ addTests = TestList [
         (Moneys [Sum 100, Money 100 "RUR"]) ~=?
         (add (Moneys [Money 100 "RUR"])
              (Moneys [Sum 100])),
-    "RUR + UAH" ~:
-        (Moneys [Money 100 "RUR", Money 50 "UAH"]) ~=?
+    "RUR + USD" ~:
+        (Moneys [Money 100 "RUR", Money 50 "USD"]) ~=?
         (add (Moneys [Money 100 "RUR"])
-             (Moneys [Money 50 "UAH"])),
+             (Moneys [Money 50 "USD"])),
     "RUR + RUR" ~:
         (Moneys [Money 150 "RUR"]) ~=?
         (add (Moneys [Money 100 "RUR"])
@@ -56,6 +84,19 @@ addTests = TestList [
         (Moneys [Sum 150, Money 250 "RUR", Money 200 "EUR"]) ~=?
         (add (Moneys [Money 100 "RUR", Sum 100, Money 50 "USD"])
              (Moneys [Money 150 "RUR", Money (-50) "USD", Money 200 "EUR", Sum 50]))
+    ]
+
+
+sumTests = TestList [
+    "empty sum" ~:
+        (Moneys []) ~=?
+        (Money.sum []),
+    "non-empty sum" ~:
+        (Moneys [Sum 100, Money 50 "RUR", Money 100 "EUR", Money 50 "USD"]) ~=?
+        (Money.sum [
+            Moneys [Sum 100, Money 50 "EUR"],
+            Moneys [Money 50 "RUR"],
+            Moneys [Money 50 "USD", Money 50 "EUR"]])
     ]
 
 
@@ -89,17 +130,36 @@ mulTests = TestList [
 
 -- sub is a composition if add and mul, so we don't test it so thoroughtly - only common cases
 subTests = TestList [
-    "complex" ~:
+    "subtract complex values" ~:
         (Moneys [Sum 50, Money (-50) "RUR", Money 100 "USD", Money (-200) "EUR"]) ~=?
         (sub (Moneys [Money 100 "RUR", Sum 100, Money 50 "USD"])
              (Moneys [Money 150 "RUR", Money (-50) "USD", Money 200 "EUR", Sum 50])),
-    "complex  - complex" ~:
+    "subtract complex value from iteself" ~:
         (Moneys []) ~=?
         (sub (Moneys [Money 100 "RUR", Sum 100, Money 50 "USD"])
              (Moneys [Money 100 "RUR", Sum 100, Money 50 "USD"]))
     ]
 
 
+intersectTests = TestList [
+    "no intersection" ~:
+        (Moneys []) ~=?
+        (intersect (Moneys [Money 100 "RUR", Sum 100])
+                   (Moneys [Money 100 "USD", Money 100 "EUR"])),
+    "general intersection" ~:
+        (Moneys [Money 50 "EUR", Sum 50]) ~=?
+        (intersect (Moneys [Money 100 "RUR", Money 50 "EUR", Sum 100])
+                   (Moneys [Money 100 "USD", Money 100 "EUR", Sum 50])),
+    "intersect with subset" ~:
+        (Moneys [Money 100 "RUR", Sum 100]) ~=?
+        (intersect (Moneys [Money 100 "RUR", Money 50 "EUR", Sum 100])
+                   (Moneys [Money 100 "RUR", Sum 100])),
+    "intersect same values" ~:
+        (Moneys [Money 100 "RUR", Sum 100]) ~=?
+        (intersect (Moneys [Money 100 "RUR", Sum 100])
+                   (Moneys [Money 100 "RUR", Sum 100]))
+    ]
 
-tests = TestList [addTests, mulTests, subTests]
+
+tests = TestList [emptyTests, equalTests, addTests, sumTests, mulTests, subTests, intersectTests]
 

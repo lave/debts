@@ -1,4 +1,4 @@
-module Normalize (normalizeTransaction)
+module Normalize
 where
 
 import Data.List

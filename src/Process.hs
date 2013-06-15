@@ -1,31 +1,38 @@
-module Process (process)
+module Process
 where
 
-import Debt
-import Param
+import qualified Data.List as List
+
+import BasicTypes
+import Balance
+import CommonCalculationLog
+import MoneyLog
 import qualified Result
+import Side
 import Transaction
 
 
 data Operation =
       Balance
-    | Log
+    | CommonCalculationLog
+    | CalculationLog
+    | MoneyLog Name
 
 
-getOperation :: Params -> Operation
-getOperation params
-    | hasParam "log" params = Log
-    | otherwise = Balance
+process :: Operation -> Transactions -> Result.Result
 
-
-process :: Params -> Transactions -> Result.Result
-process params transactions = process' (getOperation params) transactions
-    
-
-process' Balance transactions = Result.Balances $ zip balance' expenses'
+process Balance transactions =
+    Result.Balance $ zipWith zipper balance' expenses'
     where
-        balance' = calc balance transactions
-        expenses' = calc expenses transactions
+        balance'  = List.sort $ balance transactions
+        expenses' = List.sort $ expenses transactions
 
---  not implemented yet
-process' Log transactions = Result.Logs []
+        zipper (Side name1 balance) (Side name2 expenses)
+            | name1 == name2 = (name1, balance, expenses)
+
+
+process CommonCalculationLog transactions =
+    CommonCalculationLog.log transactions
+
+process (MoneyLog name) transactions =
+    MoneyLog.log name transactions

@@ -5,6 +5,7 @@ import Test.HUnit
 
 import Aggregation
 import Money
+import Side
 import Transaction
 
 

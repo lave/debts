@@ -1,3 +1,5 @@
+{-# LANGUAGE PatternGuards #-}
+
 module Main (main)
 where
 
@@ -28,6 +30,7 @@ main = do
     let fileName = head args
     let isVerbose = CommandLine.containsKey args "-v"
     let parameters = CommandLine.findParameters args
+    let mode = determineMode args
 
     s <- readFile fileName
     let tokens = alexScanTokens s
@@ -36,12 +39,12 @@ main = do
     case parse tokens of
         Ok parsed -> do
             putStrLn $ if isVerbose then "Syntax tree:\n" ++ show parsed else ""
-            printResults $ process parameters $ buildInputData parsed
+            printResults $ process mode parameters $ buildInputData parsed
         Error s ->
             putStrLn ("Parse error:" ++ s)
 
 
-process paramOverrides (Input rawParams groups fxs transactions) =
+process mode paramOverrides (Input rawParams groups fxs transactions) =
     postprocessed
     where
         params = makeParams parameterDescriptors $ rawParams ++ paramOverrides
@@ -53,7 +56,14 @@ process paramOverrides (Input rawParams groups fxs transactions) =
             |> Preprocess.convert params fxs 
 
         processed = preprocessed
-            |> Process.process params
+            |> Process.process mode
 
         postprocessed = processed
             |> Postprocess.round params
+
+
+determineMode args
+    | CommandLine.containsKey args "--log" = Process.CommonCalculationLog
+    | Just name <- CommandLine.getKey args "--ml" = Process.MoneyLog name
+    | otherwise = Process.Balance
+

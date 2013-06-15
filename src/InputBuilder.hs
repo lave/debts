@@ -3,7 +3,7 @@ where
 
 import Data.List
 
-import Date
+import BasicTypes
 import Fx
 import Money
 import Param
@@ -22,8 +22,8 @@ data Builder =
 
 data TransactionAttributeBuilder =
       ContragentBuilder Contragent
-    | CategoryBuilder [Category]
-    | TagsBuilder [Tag]
+    | CategoryBuilder Category
+    | TagsBuilder Tags
     | CommentBuilder Comment
     deriving Show
     
@@ -61,7 +61,7 @@ buildTransaction :: Maybe Date -> Builder -> RawTransaction
 buildTransaction date (TransactionBuilder payers beneficators sum attributes) =
     foldl
         applyAttribute
-        (Transaction payers beneficators sum date Nothing [] [] Nothing)
+        (Transaction payers beneficators sum date Nothing (Category []) [] Nothing)
         attributes
     where
         applyAttribute transaction (ContragentBuilder contragent) =

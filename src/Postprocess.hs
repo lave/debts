@@ -1,7 +1,8 @@
-module Postprocess (roundSides, Postprocess.round)
+module Postprocess (Postprocess.round)
 where
 
 import Data.Maybe
+import Data.List
 
 import Money
 import Param
@@ -20,46 +21,39 @@ round params result
         base = getNumberParam params "round.to"
 
 
-round' base (Balances sides) =
-    Balances $ zip
-        (roundSides smartRound base balances)
-        (roundSides roundListTo base expences)
+round' base (Balance b) =
+    Balance $ zip3
+        names
+        (roundMoneys smartRound base balances)
+        (roundMoneys roundListTo base expences)
     where
-        (balances, expences) = unzip sides
+        (names, balances, expences) = unzip3 b
 
 
---  no rounding for Log
-round' _ result@(Logs _) = result
+--  no rounding for other result types
+round' _ result = result
 
 
-roundSides :: (Double -> [Double] -> [Double]) -> Double -> [Side] -> [Side]
-roundSides rounder base sides
-    | allSidesHaveSameCurrency sides =
-        zipWith setSideMoney sides (rounder base $ map getSideMoney sides)
-    | otherwise = sides
+roundMoneys :: (Double -> [Double] -> [Double]) -> Double -> [Moneys] -> [Moneys]
+roundMoneys rounder base moneys
+    | length currencies == 1 =
+        map makeMoneys $ rounder base $ map getMoneyValue moneys
+    | otherwise = moneys
     where
-        allSidesHaveSameCurrency :: [Side] -> Bool
-        allSidesHaveSameCurrency = allSame getSideCurrency
+        currencies = nub $ map getCurrency $ concat $ map (\(Moneys m) -> m) moneys
+        currency = head currencies
 
-        currency = case sides of
-            [] -> Nothing
-            _ -> fromJust $ getSideCurrency $ head sides
+        getCurrency (Sum _) = Nothing
+        getCurrency (Money _ currency) = Just currency
 
-        getSideCurrency (Side _ (Moneys moneys)) =
-            case moneys of
-                [] -> Just Nothing
-                [Sum _] -> Just Nothing
-                [Money _ c] -> Just $ Just c
-                _ -> Nothing
-
-        getSideMoney (Side _ (Moneys moneys)) =
+        getMoneyValue m@(Moneys moneys) =
             case moneys of
                 [] -> 0
                 [Sum s] -> s
                 [Money s _] -> s
-                _ -> error ("currencies: " ++ show (map getSideCurrency sides))
+                _ -> error ("different currencies: " ++ show (map getCurrency moneys))
 
-        setSideMoney (Side name _) s
-            | s == 0 = Side name $ Moneys []
-            | currency == Nothing = Side name $ Moneys [Sum s]
-            | otherwise = Side name $ Moneys [Money s $ fromJust currency]
+        makeMoneys s
+            | s == 0 = Moneys []
+            | currency == Nothing = Moneys [Sum s]
+            | otherwise = Moneys [Money s $ fromJust currency]

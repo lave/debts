@@ -37,7 +37,8 @@ convert params fxs transactions
         currency = getStringParam params "target.currency"
         convertTransaction t = t {
             payers = map convertSide $ payers t,
-            beneficators = map convertSide $ beneficators t
+            beneficators = map convertSide $ beneficators t,
+            Transaction.sum = Just $ Fx.convert fxs (fromJust currency) $ fromJust $ Transaction.sum t
         }
 
         convertSide (Side name money) =
