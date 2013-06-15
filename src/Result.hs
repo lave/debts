@@ -1,14 +1,29 @@
 module Result
 where
 
+import BasicTypes
+import Money
 import Side
 
 
 data Result =
-      Balances [(Side, Side)]
-    | Logs [(Side, Log)]
-    | File String
-    deriving Eq
+    --  name, balance, expenses
+      Balance [(Name, Moneys, Moneys)]
+    | CommonCalculationLog [Name] [CommonCalculationLogEntry]
+    | MoneyLog Name [(Name, [MLTransaction])]
+    deriving (Eq, Show)
 
-data Log = Log String
-    deriving Eq
+--  name, sides (expenses, benefit, balance)
+type CommonCalculationLogEntry = (String, [(Moneys, Moneys, Moneys)])
+
+data MLTransaction = MLTransaction {
+    --  for transfers to another account
+    payer :: Name,
+    beneficator :: Maybe Name,
+    sum :: Moneys,
+    date :: Maybe Date,
+    contragent :: Maybe Contragent,
+    category :: Category,
+    tags :: Tags,
+    comment :: Maybe Comment
+} deriving (Eq, Show)

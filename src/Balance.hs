@@ -1,29 +1,31 @@
-module Debt (calc, balance, expenses, addSides, subSides)
+module Balance --(balance, expenses)
 where
 
+import BasicTypes
 import Money
 import Side
 import Transaction
 
 
-calc f transactions =
-    foldl f [] transactions
+balance :: Transactions -> Sides
+balance transactions =
+    foldl balance' [] transactions
 
-balance :: [Side] -> Transaction -> [Side]
-balance sides transaction =
+expenses :: Transactions -> Sides
+expenses transactions =
+    foldl expenses' [] transactions
+
+
+balance' sides transaction =
     sides
         `addSides` (payers transaction)
         `subSides` (beneficators transaction)
 
-expenses :: [Side] -> Transaction -> [Side]
-expenses sides transaction
+expenses' sides transaction
     | isInternal transaction = sides
     | otherwise = sides `addSides` (beneficators transaction)
     where
-        isInternal transaction =
-            case (contragent transaction) of
-                Just Internal -> True
-                _ -> False
+        isInternal transaction = contragent transaction == Just Internal
 
 
 addSides = combineSides add

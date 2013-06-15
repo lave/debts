@@ -1,23 +1,37 @@
 module CommandLine
 where
 
-import qualified Data.List (find, isPrefixOf)
+import Data.Maybe
+import qualified Data.List as List
 
 import Param
 
 
+type Arguments = [String]
+
+
+containsKey :: Arguments -> String -> Bool
 containsKey args name =
-    Data.List.find (== name) args /= Nothing
+    List.find (== name) args /= Nothing
+
+getKey :: Arguments -> String -> Maybe String
+getKey args name
+    | keyIndex == Nothing = Nothing
+    | fromJust keyIndex + 1 == length args = Nothing
+    | otherwise = Just $ args !! ((fromJust keyIndex) + 1)
+    where
+        keyIndex = List.elemIndex name args
+    
 
 
-findParameters :: [String] -> [RawParam]
+findParameters :: Arguments -> [RawParam]
 findParameters s =
     map (parseParameter . drop 2) (filter isParameter s)
     where
         isParameter s = and [
             length s > 2,
-            Data.List.isPrefixOf "-D" s,
-            not $ Data.List.isPrefixOf "-D=" s]
+            List.isPrefixOf "-D" s,
+            not $ List.isPrefixOf "-D=" s]
         parseParameter = splitBy (== '=')
 
 

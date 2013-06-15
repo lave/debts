@@ -1,33 +1,42 @@
-module RunTests
+module Main
 where
 
+import System.Exit
 import Test.HUnit
 
 import AggregationTest
+import BalanceTest
 import CommandLineTest
-import DebtTest
 import FxTest
 import LexerTest
 import MoneyTest
+import MoneyLogTest
+import NormalizeTest
 import ParamTest
 import ParserTest
 import RoundTest
-import TransactionTest
 import UtilsTest
 
 
 allTests = TestList [
         AggregationTest.tests,
+        BalanceTest.tests,
         CommandLineTest.tests,
-        DebtTest.tests,
         FxTest.tests,
         LexerTest.tests,
         MoneyTest.tests,
+        MoneyLogTest.tests,
+        NormalizeTest.tests,
         ParserTest.tests,
         ParamTest.tests,
         RoundTest.tests,
-        TransactionTest.tests,
         UtilsTest.tests
     ]
     
-main = runTestTT allTests
+main = do
+    counters <- runTestTT allTests
+    let failuresCount = errors counters + failures counters
+
+    if failuresCount == 0
+        then exitSuccess
+        else exitWith $ ExitFailure failuresCount

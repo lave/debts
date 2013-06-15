@@ -7,7 +7,7 @@ import Data.Maybe
 import Lexer
 import ParserMonad
 
-import Date
+import BasicTypes
 import Fx
 import InputBuilder
 import Money
@@ -115,20 +115,20 @@ TransactionAttributeBuilders :: { [TransactionAttributeBuilder] }
 
 TransactionAttributeBuilder :: { TransactionAttributeBuilder }
     : Contragent { ContragentBuilder $1 }
-    | '(' Categories ')' { CategoryBuilder $ reverse $2 }
+    | '(' Categories ')' { CategoryBuilder $ Category $ reverse $2 }
     | '[' Tags ']' { TagsBuilder $ reverse $2 }
 
 Contragent :: { Contragent }
     : '@' internal { Internal }
     | '@' string { Contragent $2 }
 
-Categories :: { [Category] }
+Categories :: { [CategoryComponent] }
     : {- empty -} { [] }
     | Category { [$1] }
     | Categories ',' Category { $3 : $1 }
 
-Category :: { Category }
-    : string { Category $1 }
+Category :: { CategoryComponent }
+    : string { $1 }
 
 Tags :: { [Tag] }
     : {- empty -} { [] }

@@ -1,5 +1,5 @@
 module Utils (
-    same, allSame,
+    same,
     trimFirst, trimLast, trimBoth,
     contains, split,
     (|>)
@@ -14,10 +14,6 @@ same :: Eq a => [a] -> [a] -> Bool
 same l1 l2 =
     length l1 == length l2 &&
     length l1 == length (intersect l1 l2)
-
-
-allSame :: Eq b => (a -> b) -> [a] -> Bool
-allSame f l = length (nub $ map f l) < 2
 
 
 trimFirst [] = []

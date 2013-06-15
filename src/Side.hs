@@ -1,6 +1,7 @@
 module Side
 where
 
+import BasicTypes
 import Money
 
 
@@ -13,10 +14,12 @@ data RawSide =
     deriving (Show, Eq)
 
 
-data Side = Side String Moneys
+data Side = Side Name Moneys
     deriving (Show, Eq)
 instance Ord Side where
     compare (Side name1 _) (Side name2 _) = compare name1 name2
+
+type Sides = [Side]
 
 
 hasMoney (RawSideWithMoney _ _) = True
