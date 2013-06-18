@@ -16,6 +16,7 @@ newtype Moneys = Moneys [Money]
 instance Eq Money where
     Sum q1 == Sum q2 = numbersAreClose q1 q2
     Money q1 c1 == Money q2 c2 = c1 == c2 && numbersAreClose q1 q2
+    _ == _ = False
 
 numbersAreClose q1 q2 = abs (q1 - q2) < 1e-10
 
