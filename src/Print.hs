@@ -2,7 +2,9 @@ module Print (printResults)
 where
 
 import Data.Maybe
+import Data.String.Utils
 
+import BasicTypes
 import Money
 import Side
 import Result
@@ -78,24 +80,26 @@ printResults (MoneyLog name logs) = do
     where
         printLog (sideName, transactions) = do
             putStrLn $ "### Side " ++ sideName
+            putStrLn "\"Num\",\"Date\",\"Payee\",\"Category\",\"S\",\"Withdrawal\",\"Deposit\",\"Total\",\"Comment\""
             sequence_ $ map printTransaction transactions
             putStrLn $ "### Side End"
 
             where
                 printTransaction t = do
-                    putStr $ payer t
-                    putStr ", "
-                    putStr $ fromMaybe "" $ beneficator t
-                    putStr ", "
-                    putStr $ show $ Result.sum t
-                    putStr ", "
-                    putStr $ show $ date t
-                    putStr ", "
-                    putStr $ show $ contragent t
-                    putStr ", "
-                    putStr $ show $ category t
-                    putStr ", "
-                    putStr $ show $ tags t
-                    putStr ", "
-                    putStr $ show $ comment t
+                    putStr $ "\"\","
+                    putStr $ "\"" ++ date' ++ "\","
+                    putStr $ "\"" ++ contragent' ++ "\","
+                    putStr $ "\"" ++ category' ++ "\","
+                    putStr $ "\"\","
+                    putStr $ "\"" ++ (show sum') ++ "\","
+                    putStr $ "\"\","
+                    putStr $ "\"\","
+                    putStr $ "\"" ++ comment' ++ "\","
                     putStrLn ""
+                    where
+                        Date date' = fromMaybe (Date "") $ date t
+                        Contragent contragent' = fromMaybe (Contragent "") $ contragent t
+                        Category categories = category t
+                        category' = join ":" $ take 2 categories
+                        Moneys sum' = Result.sum t
+                        Comment comment' = fromMaybe (Comment "") $ comment t

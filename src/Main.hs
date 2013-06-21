@@ -4,6 +4,7 @@ module Main (main)
 where
 
 import qualified System.Environment (getArgs)
+import Control.Monad
 
 import qualified CommandLine
 import InputBuilder
@@ -34,11 +35,11 @@ main = do
 
     s <- readFile fileName
     let tokens = alexScanTokens s
-    putStrLn $ if isVerbose then "Tokens:\n" ++ show tokens else ""
+    when isVerbose $ putStrLn $ "Tokens:\n" ++ show tokens
 
     case parse tokens of
         Ok parsed -> do
-            putStrLn $ if isVerbose then "Syntax tree:\n" ++ show parsed else ""
+            when isVerbose $ putStrLn $ "Syntax tree:\n" ++ show parsed
             printResults $ process mode parameters $ buildInputData parsed
         Error s ->
             putStrLn ("Parse error:" ++ s)
