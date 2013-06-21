@@ -94,12 +94,15 @@ printResults (MoneyLog name logs) = do
                     putStr $ "\"" ++ (show sum') ++ "\","
                     putStr $ "\"\","
                     putStr $ "\"\","
-                    putStr $ "\"" ++ comment' ++ "\","
+                    putStr $ "\"" ++ comment'' ++ "\","
                     putStrLn ""
                     where
                         Date date' = fromMaybe (Date "") $ date t
                         Contragent contragent' = fromMaybe (Contragent "") $ contragent t
                         Category categories = category t
-                        category' = join ":" $ take 2 categories
+                        category' = join ":" $ categories
                         Moneys sum' = Result.sum t
                         Comment comment' = fromMaybe (Comment "") $ comment t
+                        comment'' = if isNothing $ beneficator t
+                            then comment'
+                            else "<transfer to " ++ (fromJust $ beneficator t) ++ ">: " ++ comment'
