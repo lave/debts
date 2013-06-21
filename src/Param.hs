@@ -4,7 +4,7 @@ module Param (
     Params,
     makeParams,
     hasParam,
-    getStringParam, getStringsParam, getNumberParam)
+    getStringParam, getStringsParam, getNumberParam, getBoolParam)
 where
 
 import Data.List
@@ -18,6 +18,7 @@ import Utils
 data ParamType =
       StringParameter
     | NumberParameter
+    | BoolParameter
     deriving (Eq, Show)
 
 -- parameter aggregation type
@@ -64,6 +65,7 @@ addParam descriptors params (name, value) =
 data Param =
       StringParam ParamDescriptor String
     | NumberParam ParamDescriptor Double
+    | BoolParam ParamDescriptor Bool
     deriving (Eq, Show)
 type Params = Map.Map String Param
 
@@ -77,6 +79,11 @@ parseParams descriptors params =
                 descriptor = getDescriptor descriptors name
                 makeParam' StringParameter value = StringParam descriptor value
                 makeParam' NumberParameter value = NumberParam descriptor $ read value
+                makeParam' BoolParameter value = BoolParam descriptor $ parseBool value
+                
+                parseBool s
+                    | s == "" || s == "true" = True
+                    | otherwise = False
 
 
 makeParams :: [ParamDescriptor] -> [RawParam] -> Params
@@ -110,6 +117,13 @@ getNumberParam params name =
         Just (NumberParam _ value) -> Just value
         Nothing -> Nothing
         _ -> error $ "Parameter " ++ name ++ " is not a number"
+
+getBoolParam :: Params -> String -> Bool
+getBoolParam params name =
+    case Map.lookup name params of
+        Just (BoolParam _ value) -> value
+        Nothing -> False
+        _ -> error $ "Parameter " ++ name ++ " is not a boolean value"
 
 hasParam :: String -> Params -> Bool
 hasParam name params =

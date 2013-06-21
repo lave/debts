@@ -23,7 +23,8 @@ import Utils
 parameterDescriptors = [
     Param "round.to" NumberParameter Override,
     Param "target.currency" StringParameter Override,
-    Param "aggregate" StringParameter (Concatenate ",")
+    Param "aggregate" StringParameter (Concatenate ","),
+    Param "split" BoolParameter Override
     ]
 
 main = do
@@ -54,6 +55,7 @@ process mode paramOverrides (Input rawParams groups fxs transactions) =
             |> Preprocess.normalize groups
             |> Preprocess.filter params
             |> Preprocess.aggregate params
+            |> Preprocess.splitGroups params
             |> Preprocess.convert params fxs 
 
         processed = preprocessed
