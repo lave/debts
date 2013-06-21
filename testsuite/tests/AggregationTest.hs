@@ -18,10 +18,22 @@ parseAggGroupTest = test [
         ~=? parseAggGroups ["a+b+c"],
     "several groups" ~:
         [AggGroup "a+b" ["a", "b"], AggGroup "c+d" ["c", "d"]]
-        ~=? parseAggGroups ["a+b", "c+d"]
+        ~=? parseAggGroups ["a+b", "c+d"],
     {- must generate error
     "one memeber in several groups" ~:
-        parseAggGroups ["a", "a+b"]
+        []
+        ~=? parseAggGroups ["a", "a+b"]
+    -}
+    "group with name" ~:
+        [AggGroup "c" ["a", "b"]]
+        ~=? parseAggGroups ["c=a+b"],
+    "name alial" ~:
+        [AggGroup "b" ["a"]]
+        ~=? parseAggGroups ["b=a"]
+    {- must generate error
+    "group with several names" ~:
+        []
+        ~=? parseAggGroups ["c=d=a+b"]
     -}
     ]
 

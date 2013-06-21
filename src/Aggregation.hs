@@ -23,9 +23,17 @@ parseAggGroups groups
     | otherwise = error $ "These names are included to multiple aggregation groups: " ++ intercalate ", " duplicates
     where
         parsedGroups = map parseGroup $ filter (contains "+") groups
-        parseGroup s = AggGroup s $ split "+" s
         duplicates = nub $ names \\ (nub names)
         names = concatMap groupNames parsedGroups
+
+        parseGroup s
+            | length tokens <= 2 = AggGroup name $ split "+" groups
+            | otherwise = error $ "More than one '=' sign in aggregation group definition: " ++ s
+            where
+                tokens = split "=" s
+                name = tokens !! 0
+                groups = tokens !! (min 1 $ length tokens - 1)
+                
 
 
 aggregateTransaction :: AggGroups -> Transaction -> Transaction
