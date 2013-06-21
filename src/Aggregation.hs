@@ -22,7 +22,7 @@ parseAggGroups groups
     | length duplicates == 0 = parsedGroups
     | otherwise = error $ "These names are included to multiple aggregation groups: " ++ intercalate ", " duplicates
     where
-        parsedGroups = map parseGroup $ filter (contains "+") groups
+        parsedGroups = map parseGroup groups
         duplicates = nub $ names \\ (nub names)
         names = concatMap groupNames parsedGroups
 

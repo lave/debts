@@ -8,6 +8,7 @@ import Fx
 import Normalize
 import Round
 import Side
+import SplitSide
 import Transaction
 import Param
 
@@ -28,6 +29,12 @@ aggregate params transactions =
     where
         aggGroups = parseAggGroups $ getStringsParam params "aggregate"
 
+
+splitGroups :: Params -> Transactions -> Transactions
+splitGroups params transactions
+    | getBoolParam params "split" = map split transactions
+    | otherwise = transactions
+    
 
 convert :: Params -> Fxs -> Transactions -> Transactions
 convert params fxs transactions

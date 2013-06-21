@@ -9,7 +9,8 @@ descriptors = [
     Param "string" StringParameter Override,
     Param "number" NumberParameter Override,
     Param "number1" NumberParameter NoOverride,
-    Param "strings" StringParameter (Concatenate ";")
+    Param "strings" StringParameter (Concatenate ";"),
+    Param "bool" BoolParameter Override
     ]
     
 
@@ -36,5 +37,27 @@ makeAndGetTests = test [
             ("strings", "b;c")
             ]
 
-tests = test [makeAndGetTests]
+
+boolTest = test [
+    "not defined" ~:
+        False ~=? getBoolFrom [],
+    "defined empty" ~:
+        True  ~=? getBoolFrom [("bool", "")],
+    "defined 'true'" ~:
+        True  ~=? getBoolFrom [("bool", "true")],
+    "defined 'TRUE'" ~:
+        True  ~=? getBoolFrom [("bool", "TRUE")],
+    "defined 'false'" ~:
+        False ~=? getBoolFrom [("bool", "false")],
+    "defined 'FALSE'" ~:
+        False ~=? getBoolFrom [("bool", "FALSE")],
+    "defined something else" ~:
+        False ~=? getBoolFrom [("bool", "some")]
+    ]
+    where
+        getBoolFrom rawParams =
+            getBoolParam (makeParams descriptors rawParams) "bool"
+
+
+tests = test [makeAndGetTests, boolTest]
 

@@ -11,7 +11,7 @@ import Transaction
 
 parseAggGroupTest = test [
     "group of one member" ~:
-        []
+        [AggGroup "a" ["a"]]
         ~=? parseAggGroups ["a"],
     "group of several members" ~:
         [AggGroup "a+b+c" ["a", "b", "c"]]
@@ -27,7 +27,7 @@ parseAggGroupTest = test [
     "group with name" ~:
         [AggGroup "c" ["a", "b"]]
         ~=? parseAggGroups ["c=a+b"],
-    "name alial" ~:
+    "name alias" ~:
         [AggGroup "b" ["a"]]
         ~=? parseAggGroups ["b=a"]
     {- must generate error
