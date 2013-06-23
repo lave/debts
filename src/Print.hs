@@ -3,6 +3,7 @@ where
 
 import Data.Maybe
 import Data.String.Utils
+import System.IO
 
 import BasicTypes
 import Money
@@ -74,28 +75,20 @@ printResults (CommonCalculationLog names log) = do
 
 
 printResults (MoneyLog name logs) = do
-    putStrLn $ "### Money log for " ++ name
+    putStrLn $ "Money log for " ++ name
     sequence_ $ map printLog logs
 
     where
         printLog (sideName, transactions) = do
-            putStrLn $ "### Side " ++ sideName
-            putStrLn "\"Num\",\"Date\",\"Payee\",\"Category\",\"S\",\"Withdrawal\",\"Deposit\",\"Total\",\"Comment\""
-            sequence_ $ map printTransaction transactions
-            putStrLn $ "### Side End"
-
+            let lines = "\"Num\",\"Date\",\"Payee\",\"Category\",\"S\",\"Withdrawal\",\"Deposit\",\"Total\",\"Comment\"" : map makeLine transactions
+            let fileName = "moneylog_" ++ name ++ "_" ++ sideName ++ ".csv"
+            putStrLn $ "Writing log for side " ++ sideName ++ " to file " ++ fileName
+            file <- openFile fileName WriteMode
+            sequence_ $ map (hPutStrLn file) lines
+            hClose file
             where
-                printTransaction t = do
-                    putStr $ "\"\","
-                    putStr $ "\"" ++ date' ++ "\","
-                    putStr $ "\"" ++ contragent' ++ "\","
-                    putStr $ "\"" ++ category' ++ "\","
-                    putStr $ "\"\","
-                    putStr $ "\"" ++ (show sum') ++ "\","
-                    putStr $ "\"\","
-                    putStr $ "\"\","
-                    putStr $ "\"" ++ comment'' ++ "\","
-                    putStrLn ""
+                makeLine t =
+                    "\"\",\"" ++ date' ++ "\",\"" ++ contragent' ++ "\",\"" ++ category' ++ "\",\"\",\"" ++ (show sum') ++ "\",\"\",\"\",\"" ++ comment'' ++ "\""
                     where
                         Date date' = fromMaybe (Date "") $ date t
                         Contragent contragent' = fromMaybe (Contragent "") $ contragent t
