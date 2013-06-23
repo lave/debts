@@ -107,6 +107,24 @@ TransactionBuilder :: { Builder }
             (reverse $ fromMaybe $1 $5)
             $3
             ($6 ++ $7) }
+    | TSides '>' TSides TransactionAttributeBuilders CommentBuilder
+        { TransactionBuilder
+            (reverse $1)
+            (reverse $3)
+            Nothing
+            ($4 ++ $5) }
+    | TSides '>' MaybeMoneys TransactionAttributeBuilders CommentBuilder
+        { TransactionBuilder
+            (reverse $1)
+            (reverse $1)
+            $3
+            ($4 ++ $5) }
+    | TSides TransactionAttributeBuilders CommentBuilder
+        { TransactionBuilder
+            (reverse $1)
+            (reverse $1)
+            Nothing
+            ($2 ++ $3) }
 
 
 TransactionAttributeBuilders :: { [TransactionAttributeBuilder] }

@@ -84,15 +84,28 @@ parseTransactionsTest = test [
 
     "no sum" ~:
         Just [transaction { Transaction.sum = Nothing }]
+        ~=? parseTransactions "A > B",
+    "auto sum" ~:
+        Just [transaction { Transaction.sum = Nothing }]
         ~=? parseTransactions "A > _ > B",
-    "sum with currency" ~:
-        Just [transaction { Transaction.sum = Just $ Moneys [Money 50 "EUR"] }]
-        ~=? parseTransactions "A > 50 EUR > B",
 
     "no beneficators" ~:
         Just [transaction { beneficators = payers transaction }]
+        ~=? parseTransactions "A > 50",
+    "auto beneficators" ~:
+        Just [transaction { beneficators = payers transaction }]
         ~=? parseTransactions "A > 50 > _",
 
+    "no sum nor beneficators" ~:
+        Just [transaction { beneficators = payers transaction, Transaction.sum = Nothing }]
+        ~=? parseTransactions "A",
+    "auto sum and beneficators" ~:
+        Just [transaction { beneficators = payers transaction, Transaction.sum = Nothing }]
+        ~=? parseTransactions "A > _ > _",
+
+    "sum with currency" ~:
+        Just [transaction { Transaction.sum = Just $ Moneys [Money 50 "EUR"] }]
+        ~=? parseTransactions "A > 50 EUR > B",
     "side with factor" ~:
         Just [transaction { payers = [RawSideWithFactor "A" 2] }]
         ~=? parseTransactions "A * 2 > 50 > B",
