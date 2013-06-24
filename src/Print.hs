@@ -23,6 +23,7 @@ printResults (Balance b) = do
             |> addHeader ["Name", "Balance", "Expenses"]
             |> addSeparator
             |> setGlobalAlign AlignRight
+            |> setAlign 0 AlignLeft
             |> addRows (map toRow b)
             |> addSeparator
             |> addRow (toRow ("Total", Money.sum balance, Money.sum expenses))
