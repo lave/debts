@@ -34,6 +34,15 @@ testTrim = test [
     "trim both many" ~: "b" ~=? trimBoth "abc"
     ]
 
+testSetNth = test [
+    "set in the middle" ~:
+        [1, 4, 3] ~=? setNth 1 4 [1, 2, 3],
+    "set last" ~:
+        [1, 2, 4] ~=? setNth 2 4 [1, 2, 3],
+    "set after last" ~:
+        [1, 2, 3] ~=? setNth 3 4 [1, 2, 3]
+    ]
 
-tests = test [testSame, testTrim]
+
+tests = test [testSame, testTrim, testSetNth]
 

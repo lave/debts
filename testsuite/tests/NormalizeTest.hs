@@ -146,4 +146,3 @@ normalizeSidesTest = test [
             assertBool "" $ s1 == s2 && same p1 p2 && same b1 b2
 
 tests = test [expandGropusTest, processSidesTest, normalizeSidesTest]
-
