@@ -7,45 +7,31 @@ import System.IO
 
 import BasicTypes
 import Money
-import Side
+import PrintTable
 import Result
 import Round
-
-
-padRight n s
-    | l > n = (take (n - 3) s) ++ "..."
-    | otherwise = s ++ (replicate (n - l) ' ')
-    where
-        l = length s
-
-padLeft n s
-    | l > n = padRight n s
-    | otherwise = (replicate (n - l) ' ') ++ s
-    where
-        l = length s
+import Utils
 
 
 printResults (Balance b) = do
-    putStrLn $ (padRight 20 "Name") ++ (padRight 20 "Balance") ++ (padRight 20 "Expenses")
-    putStrLn (replicate 60 '-')
-
-    sequence_ $ map printResult b
-    putStrLn (replicate 60 '-')
-
-    let (names, balance, expenses) = unzip3 b
-    printResult ("Total", Money.sum balance, Money.sum expenses)
+    sequence_ $ map putStrLn $ toStrings " | " makeTable
 
     where
-        printResult (name, balance, expenses) = do
-            putStrLn $ (padRight 20 name) ++ (padLeft 20 $ show balance) ++ (padLeft 20 $ show expenses)
+        (names, balance, expenses) = unzip3 b
+
+        makeTable = tableBuilder
+            |> addHeader ["Name", "Balance", "Expenses"]
+            |> addSeparator
+            |> setGlobalAlign AlignRight
+            |> addRows (map toRow b)
+            |> addSeparator
+            |> addRow (toRow ("Total", Money.sum balance, Money.sum expenses))
+            |> build
+
+        toRow (name, balance, expenses) =
+            [name, show balance, show expenses]
 
 
-
-{-
-    A   B   C   comment
-    +4  -3  -1  beer
-    -4  -4  +8  smth else
--}
 printResults (CommonCalculationLog names log) = do
     sequence_ $ map (\name -> putStr $ padRight 40 name) (names ++ ["Transaction"])
     putStrLn ""

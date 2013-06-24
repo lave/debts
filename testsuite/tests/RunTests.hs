@@ -14,6 +14,7 @@ import MoneyLogTest
 import NormalizeTest
 import ParamTest
 import ParserTest
+import PrintTableTest
 import RoundTest
 import UtilsTest
 
@@ -29,6 +30,7 @@ allTests = TestList [
         NormalizeTest.tests,
         ParserTest.tests,
         ParamTest.tests,
+        PrintTableTest.tests,
         RoundTest.tests,
         UtilsTest.tests
     ]

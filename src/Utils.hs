@@ -1,7 +1,7 @@
 module Utils (
     same,
     trimFirst, trimLast, trimBoth,
-    contains, split,
+    contains, split, setNth,
     (|>)
     )
 where
@@ -30,6 +30,13 @@ contains = Data.List.isInfixOf
 
 split :: Eq a => [a] -> [a] -> [[a]]
 split = Data.List.Utils.split
+
+setNth :: Int -> a -> [a] -> [a]
+setNth index value list
+    | null y = list
+    | otherwise = x ++ value : tail y
+    where
+        (x, y) = splitAt index list
 
 --  fancy 'pipe' operator
 --a |> f = f a
