@@ -31,8 +31,7 @@ makeTableTest = test [
         ~=? tableBuilder
             |> addHeader ["A", "B"]
             |> addSeparator
-            |> addRow ["a", "b"]
-            |> addRow ["c", "d"]
+            |> addRows [["a", "b"],["c", "d"]]
             |> addSeparator
             |> addRow ["e", "f"]
             |> build,

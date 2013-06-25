@@ -13,8 +13,12 @@ import Round
 import Utils
 
 
+putLines lines = do
+    sequence_ $ map putStrLn lines
+
+
 printResults (Balance b) = do
-    sequence_ $ map putStrLn $ toStrings " | " makeTable
+    putLines $ toStrings " | " makeTable
 
     where
         (names, balance, expenses) = unzip3 b
@@ -34,24 +38,26 @@ printResults (Balance b) = do
 
 
 printResults (CommonCalculationLog names log) = do
-    sequence_ $ map (\name -> putStr $ padRight 40 name) (names ++ ["Transaction"])
-    putStrLn ""
-    putStrLn (replicate 60 '-')
-
-    sequence_ $ map printLogEntry log
-    putStrLn (replicate 60 '-')
-
-    let total = ("Total", totals log)
-    printLogEntry total
+    putLines $ toStrings " | " makeTable
 
     where
-        printLogEntry (name, sides) = do
-            sequence_ $ map printSide sides
-            putStrLn $ "| " ++ name
+        makeTable = tableBuilder
+            |> addHeader (names ++ ["Transaction"])
+            |> addSeparator
+            |> setGlobalAlign AlignRight
+            |> setAlign (length names) AlignLeft
+            |> addRows (map (toRow True) log)
+            |> addSeparator
+            |> addRow (toRow False ("Total", totals log))
+            |> build
 
-        printSide (expenses, benefit, balance) =
-            --putStr $ padLeft 40 $ (show expenses) ++ " - " ++ (show benefit) ++ " = " ++ (show balance)
-            putStr $ padLeft 40 $ show balance
+        toRow verbose (name, sides) =
+            (map (printSide verbose) sides) ++ [name]
+
+        printSide verbose (expenses, benefit, balance) =
+            if verbose
+                then (show expenses) ++ " - " ++ (show benefit) ++ " = " ++ (show balance)
+                else show balance
 
         totals :: [CommonCalculationLogEntry] -> [(Moneys, Moneys, Moneys)]
         totals log = foldl

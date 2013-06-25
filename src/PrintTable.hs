@@ -40,7 +40,7 @@ addRow row (TableBuilder format rows) =
     TableBuilder format $ Row (zipWith Cell format row) : rows
 
 addRows :: [RowText] -> TableBuilder -> TableBuilder
-addRows rows tableBuilder = foldr addRow tableBuilder rows
+addRows rows tableBuilder = foldl (flip addRow) tableBuilder rows
 
 addSeparator :: TableBuilder -> TableBuilder
 addSeparator (TableBuilder format rows) =

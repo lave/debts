@@ -2,6 +2,7 @@ module CommonCalculationLog
 where
 
 import Data.Maybe
+import Data.String.Utils
 
 import BasicTypes
 import Money
@@ -17,9 +18,8 @@ log transactions =
         names = getNames transactions
 
         makeLogEntry :: [Name] -> Transaction -> Result.CommonCalculationLogEntry
-        makeLogEntry names transaction = (trname, trs)
+        makeLogEntry names transaction = (transactionName transaction, trs)
             where
-                Comment trname = fromMaybe (Comment "n/a") (comment transaction)
                 trs = map makeP names
 
                 makeP :: Name -> (Moneys, Moneys, Moneys)
@@ -27,3 +27,16 @@ log transactions =
                     where
                         expenses = getMoneyFor name $ payers transaction
                         benefit = getMoneyFor name $ beneficators transaction
+
+                transactionName t
+                    | null name = "n/a"
+                    | otherwise = name
+                    where
+                        name = date' ++ contragent' ++ category' ++ comment'
+                        date' = maybe "" (\(Date d) -> d ++ ": ") $ date t
+                        contragent' = maybe "" (\(Contragent c) -> c ++ ", ") $ contragent t
+                        Category categories = category t
+                        category' = if null categories
+                            then ""
+                            else (join "." $ categories) ++ ": "
+                        comment' = maybe "" (\(Comment c) -> c) $ comment t
