@@ -48,17 +48,22 @@ processSides sides =
 
 -- determine effective sum and split it between sides according to factors etc
 normalizeSides :: Maybe Moneys -> [RawSide] -> [RawSide] -> (Moneys, [Side], [Side])
-normalizeSides sum payers beneficators = (sum', payers', beneficators')
+normalizeSides sum payers beneficators
+    | length sums == 1 = (sum', payers', beneficators')
+    | length sums == 0 = error $ "Failed to deduce transaction sum for " ++ transactionString
+    | otherwise = error $ "Ambiguous transaction sum for " ++ transactionString ++ ": " ++ (show sums)
     where
-        sum' = fromJust $ allTheSame [sum,
+        transactionString = "transaction {payers: " ++ (show payers)
+            ++ ", beneficators: " ++ (show beneficators)
+            ++ ", sum: " ++ (show sum) ++ "}"
+
+        sums = nub $ catMaybes [sum,
             getMoneysOnlyIfAllHasMoneys payers,
             getMoneysOnlyIfAllHasMoneys beneficators]
+        sum' = head sums
         payers' = splitSum payers sum'
         beneficators' = splitSum beneficators sum'
 
-        allTheSame l | length l' == 1 = head l'
-            where
-                l' = nub (filter isJust l)
         getMoneysOnlyIfAllHasMoneys sides
             | all hasMoney sides = Just $ sumMoney sides
             | otherwise = Nothing
@@ -83,8 +88,7 @@ normalizeSides sum payers beneficators = (sum', payers', beneficators')
 
 normalizeTransaction :: [Group] -> RawTransaction -> Transaction
 normalizeTransaction groups (Transaction payers beneficators sum date contragent category tags comment) =
-    Transaction
-        payers' beneficators' (Just sum') date contragent category tags comment
+    Transaction payers' beneficators' (Just sum') date contragent category tags comment
     where
         (sum', payers', beneficators') = normalizeSides sum
             (processSides $ expandGroups groups payers)

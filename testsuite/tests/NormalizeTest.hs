@@ -109,14 +109,21 @@ normalizeSidesTest = test [
         ),
 
 {-
-    "split by moneys - different moneys 1" ~:
+    "no moneys" ~: compareResults (Moneys[], [], [])
+        (normalizeSides
+            Nothing
+            [RawSide "stan"]
+            [RawSide "eric"]
+        ),
+
+    "ambiguous  moneys 1" ~: compareResults (Moneys[], [], [])
         (normalizeSides
             Nothing
             [RawSideWithMoney "stan" (Moneys [Money 10 "RUR"])]
             [RawSideWithMoney "eric" (Moneys [Money 20 "RUR"])]
         ),
 
-    "split by moneys - different moneys 2" ~:
+    "ambiguous  moneys 2" ~: compareResults (Moneys[], [], [])
         (normalizeSides
             (Just (Moneys [Money 30 "RUR"]))
             [RawSideWithMoney "stan" (Moneys [Money 10 "RUR"])]
