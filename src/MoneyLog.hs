@@ -64,15 +64,6 @@ splitTransaction name transaction = me2me ++ me2them ++ them2me
             else error $ "Splitting payer '" ++ name
                 ++ "' to beneficators is ambiguous for transaction "
                 ++ (show transaction)
-                {-
-                ++ "\nself' = " ++ (show selfExpenses)
-                ++ "\npayers' = " ++ (show payers')
-                ++ "\nbeneficators' = " ++ (show beneficators')
-                ++ "\nme2them' = " ++ (show me2them')
-                ++ "\npot. me2them' = " ++ (show possible_me2them)
-                ++ "\npot. sum = " ++ show(Money.sum possible_me2them)
-                ++ "\nequals = " ++ show (Money.sum possible_me2them == me2them')
-                -}
         
         -- internal transaction from them to me is internal transfer between accounts
         -- external transaction form them to me is transaction with contragent
