@@ -81,14 +81,25 @@ printResults (MoneyLog name logs) = do
             hClose file
             where
                 makeLine t =
-                    "\"\",\"" ++ date' ++ "\",\"" ++ contragent' ++ "\",\"" ++ category' ++ "\",\"\",\"" ++ (show sum') ++ "\",\"\",\"\",\"" ++ comment'' ++ "\""
+                    "\"\",\"" ++ date' ++ "\",\"" ++ contragent'' ++ "\",\"" ++ category' ++ "\",\"\",\"" ++ (show sum') ++ "\",\"\",\"\",\"" ++ comment'' ++ "\""
                     where
+                        isTransfer = not $ isNothing $ beneficator t
+                        account = fromJust $ beneficator t
                         Date date' = fromMaybe (Date "") $ date t
-                        Contragent contragent' = fromMaybe (Contragent "") $ contragent t
+                        contragent' = getContragent $ contragent t
+                        contragent'' = if isTransfer then account else contragent'
                         Category categories = category t
                         category' = join ":" $ categories
                         Moneys sum' = Result.sum t
                         Comment comment' = fromMaybe (Comment "") $ comment t
-                        comment'' = if isNothing $ beneficator t
-                            then comment'
-                            else "<transfer to " ++ (fromJust $ beneficator t) ++ ">: " ++ comment'
+                        comment'' = comment'
+                            |> prependIf (not $ null contragent') ("<payee:" ++ contragent' ++ "> ")
+                            |> prependIf isTransfer ("<transfer to " ++ (fromJust $ beneficator t) ++ ">: ")
+
+                        getContragent Nothing = ""
+                        getContragent (Just Internal) = ""
+                        getContragent (Just (Contragent contragent)) = contragent
+
+                        prependIf :: Bool -> String -> String -> String
+                        prependIf False _ string = string
+                        prependIf True prefix string = prefix ++ string
