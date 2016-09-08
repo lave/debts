@@ -46,7 +46,7 @@ processSides sides =
         
 
 
--- determine effective sum and split it between sides according to factors etc
+-- determine effective sum and split it between sides according to factors, summands etc
 normalizeSides :: Maybe Moneys -> [RawSide] -> [RawSide] -> (Moneys, [Side], [Side])
 normalizeSides sum payers beneficators
     | length sums == 1 = (sum', payers', beneficators')
@@ -81,9 +81,8 @@ normalizeSides sum payers beneficators
             where
                 total_f = sumFactors sides
                 extra_money = sub sum $ sumMoney sides
-                makeSide (RawSide name) = Side name (mul (1 / total_f) extra_money)
-                makeSide (RawSideWithFactor name factor) = Side name (mul (factor / total_f) extra_money)
-                makeSide (RawSideWithMoney name money) = Side name money
+                makeSide side = Side (getName side) $
+                    add (getMoney side) $ mul (getFactor side / total_f) extra_money
 
 
 normalizeTransaction :: [Group] -> RawTransaction -> Transaction

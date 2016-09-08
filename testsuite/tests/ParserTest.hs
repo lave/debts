@@ -106,6 +106,13 @@ parseTransactionsTest = test [
     "sum with currency" ~:
         Just [transaction { Transaction.sum = Just $ Moneys [Money 50 "EUR"] }]
         ~=? parseTransactions "A > 50 EUR > B",
+    "sum with several currencies" ~:
+        Just [transaction { Transaction.sum = Just $ Moneys [Money 100 "USD", Sum 10, Money 50 "EUR"] }]
+        ~=? parseTransactions "A > 50 EUR 10 100 USD > B",
+
+    "minus side" ~:
+        Just [transaction { payers = [RawSideRemove "A"] }]
+        ~=? parseTransactions "-A > 50 > B",
     "side with factor" ~:
         Just [transaction { payers = [RawSideWithFactor "A" 2] }]
         ~=? parseTransactions "A * 2 > 50 > B",
@@ -115,21 +122,28 @@ parseTransactionsTest = test [
     "side with money with currency" ~:
         Just [transaction { payers = [RawSideWithMoney "A" $ Moneys [Money 50 "EUR"]] }]
         ~=? parseTransactions "A 50 EUR > 50 > B",
-    "minus side" ~:
-        Just [transaction { payers = [RawSideRemove "A"] }]
-        ~=? parseTransactions "-A > 50 > B",
+    "side with plus money" ~:
+        Just [transaction { payers = [RawSideWithSummand "A" $ Moneys [Sum 10]] }]
+        ~=? parseTransactions "A + 10 > 50 > B",
+    "side with minus money" ~:
+        Just [transaction { payers = [RawSideWithSummand "A" $ Moneys [Sum (-10)]] }]
+        ~=? parseTransactions "A + -10 > 50 > B",
+
     "side override" ~:
         Just [transaction { payers = [RawSideOverride $ RawSide "A"] }]
         ~=? parseTransactions "=A > 50 > B",
+    "side override with minus" ~:
+        Just [transaction { payers = [RawSideOverride $ RawSideRemove "A"] }]
+        ~=? parseTransactions "=-A > 50 > B",
     "side override with factor" ~:
         Just [transaction { payers = [RawSideOverride $ RawSideWithFactor "A" 2] }]
         ~=? parseTransactions "=A * 2 > 50 > B",
     "side override with money" ~:
         Just [transaction { payers = [RawSideOverride $ RawSideWithMoney "A" $ Moneys [Sum 50]] }]
         ~=? parseTransactions "=A 50 > 50 > B",
-    "side override with minus" ~:
-        Just [transaction { payers = [RawSideOverride $ RawSideRemove "A"] }]
-        ~=? parseTransactions "=-A > 50 > B",
+    "side override with plus money" ~:
+        Just [transaction { payers = [RawSideOverride $ RawSideWithSummand "A" $ Moneys [Sum 10]] }]
+        ~=? parseTransactions "=A + 10 > 50 > B",
 
     "several sides" ~:
         Just [transaction {
