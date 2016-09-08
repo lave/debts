@@ -31,6 +31,7 @@ import Transaction
     '*'         { Token _ (TokenSym '*') }
     '='         { Token _ (TokenSym '=') }
     '-'         { Token _ (TokenSym '-') }
+    '+'         { Token _ (TokenSym '+') }
     '@'         { Token _ (TokenSym '@') }
     '('         { Token _ (TokenSym '(') }
     ')'         { Token _ (TokenSym ')') }
@@ -195,13 +196,17 @@ TSides :: { [RawSide] }
 
 TSide :: { RawSide }
     : Side { $1 }
+    | SideRemove { $1 }
     | SideWithFactor { $1 }
     | SideWithMoney { $1 }
-    | SideRemove { $1 }
+    | SideWithSummand { $1 }
     | '=' TSide { RawSideOverride $2 }
 
 Side :: { RawSide }
     : string { RawSide $1 }
+
+SideRemove :: { RawSide }
+    : '-' string { RawSideRemove $2 }
 
 SideWithFactor :: { RawSide }
     : string '*' number { RawSideWithFactor $1 $3 }
@@ -209,8 +214,8 @@ SideWithFactor :: { RawSide }
 SideWithMoney :: { RawSide }
     : string Moneys { RawSideWithMoney $1 $2 }
 
-SideRemove :: { RawSide }
-    : '-' string { RawSideRemove $2 }
+SideWithSummand :: { RawSide }
+    : string '+' Moneys { RawSideWithSummand $1 $3 }
 
 {
 parseError :: [Token] -> ParserError a

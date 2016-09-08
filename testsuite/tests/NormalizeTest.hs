@@ -10,7 +10,6 @@ import Transaction
 import Normalize
 
 
-
 expandGropusTest = test [
     "only group" ~:
         [RawSide "stan", RawSide "kyle", RawSide "eric", RawSide "kenny"] ~=?
@@ -108,6 +107,23 @@ normalizeSidesTest = test [
              RawSideWithMoney "eric" (Moneys [Money 20 "RUR"])]
         ),
 
+    "split by plus moneys" ~: compareResults
+        (   Moneys [Money 40 "RUR"],
+            [Side "stan" (Moneys [Money 15 "RUR"]),
+             Side "kenny" (Moneys [Money 25 "RUR"])],
+            [Side "stan" (Moneys [Money 10 "RUR"]),
+             Side "eric" (Moneys [Money 5 "RUR"]),
+             Side "kyle" (Moneys [Money 25 "RUR"])]
+        )
+        (normalizeSides
+            (Just (Moneys [Money 40 "RUR"]))
+            [RawSide "stan",
+             RawSideWithSummand "kenny" (Moneys [Money 10 "RUR"])]
+            [RawSide "stan",
+             RawSideWithSummand "eric" (Moneys [Money (-5) "RUR"]),
+             RawSideWithSummand "kyle" (Moneys [Money 15 "RUR"])]
+        ),
+
 {-
     "no moneys" ~: compareResults (Moneys[], [], [])
         (normalizeSides
@@ -116,14 +132,14 @@ normalizeSidesTest = test [
             [RawSide "eric"]
         ),
 
-    "ambiguous  moneys 1" ~: compareResults (Moneys[], [], [])
+    "ambiguous moneys 1" ~: compareResults (Moneys[], [], [])
         (normalizeSides
             Nothing
             [RawSideWithMoney "stan" (Moneys [Money 10 "RUR"])]
             [RawSideWithMoney "eric" (Moneys [Money 20 "RUR"])]
         ),
 
-    "ambiguous  moneys 2" ~: compareResults (Moneys[], [], [])
+    "ambiguous moneys 2" ~: compareResults (Moneys[], [], [])
         (normalizeSides
             (Just (Moneys [Money 30 "RUR"]))
             [RawSideWithMoney "stan" (Moneys [Money 10 "RUR"])]
@@ -131,21 +147,21 @@ normalizeSidesTest = test [
         ),
 -}
 
-    "split by factors and moneys" ~: compareResults
-        (   Moneys [Money 30 "RUR"],
+    "complex split" ~: compareResults
+        (   Moneys [Money 40 "RUR"],
             [Side "stan" (Moneys [Money 10 "RUR"]),
-             Side "kenny" (Moneys [Money 20 "RUR"])],
-            [Side "stan" (Moneys [Money 5 "RUR"]),
-             Side "eric" (Moneys [Money 15 "RUR"]),
-             Side "kyle" (Moneys [Money 10 "RUR"])]
+             Side "kenny" (Moneys [Money 30 "RUR"])],
+            [Side "stan" (Moneys [Money 10 "RUR"]),
+             Side "kyle" (Moneys [Money 15 "RUR"]),
+             Side "eric" (Moneys [Money 15 "RUR"])]
         )
         (normalizeSides
-            (Just (Moneys [Money 30 "RUR"]))
+            (Just (Moneys [Money 40 "RUR"]))
             [RawSide "stan",
-             RawSideWithMoney "kenny" (Moneys [Money 20 "RUR"])]
-            [RawSide "stan",
-             RawSideWithFactor "kyle" 2,
-             RawSideWithMoney "eric" (Moneys [Money 15 "RUR"])]
+             RawSideWithMoney "kenny" (Moneys [Money 30 "RUR"])]
+            [RawSideWithFactor "stan" 2,
+             RawSideWithMoney "kyle" (Moneys [Money 15 "RUR"]),
+             RawSideWithSummand "eric" (Moneys [Money 10 "RUR"])]
         )
     ]
     where

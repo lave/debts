@@ -14,7 +14,7 @@ $quote = \"
 tokens :-
     $white+ ;
     "#".*   ;
-    [>:\,_\*=\-@\(\)\[\]]       { \p s -> Token p $ TokenSym $ head s }
+    [>:\,_\*=\-\+@\(\)\[\]]     { \p s -> Token p $ TokenSym $ head s }
     "param"                     { \p s -> Token p $ TokenKeyword "param" }
     "fx"                        { \p s -> Token p $ TokenKeyword "fx" }
     "group"                     { \p s -> Token p $ TokenKeyword "group" }
