@@ -7,6 +7,7 @@ module Param (
     getStringParam, getStringsParam, getNumberParam, getBoolParam)
 where
 
+import Data.Char
 import Data.List
 import Data.Maybe
 import qualified Data.Map as Map
@@ -82,7 +83,7 @@ parseParams descriptors params =
                 makeParam' BoolParameter value = BoolParam descriptor $ parseBool value
                 
                 parseBool s
-                    | s == "" || s == "true" = True
+                    | s == "" || (map toLower s) == "true" = True
                     | otherwise = False
 
 
