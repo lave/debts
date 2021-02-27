@@ -39,7 +39,6 @@ empty :: Moneys -> Bool
 empty (Moneys []) = True
 empty _ = False
 
-
 add :: Moneys -> Moneys -> Moneys
 add (Moneys l) (Moneys r) = Moneys $ foldl add' l r
     where

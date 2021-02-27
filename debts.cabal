@@ -12,6 +12,7 @@ Executable debts
   Build-Depends:    base, array, containers, MissingH
   Hs-Source-Dirs:   src
   Other-Modules:    Lexer Parser
+  build-tools: alex, happy
   Default-Language: Haskell98
 
 Test-Suite tests

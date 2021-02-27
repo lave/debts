@@ -29,6 +29,7 @@ import Transaction
     '_'         { Token _ (TokenSym '_') }
     ','         { Token _ (TokenSym ',') }
     '*'         { Token _ (TokenSym '*') }
+    '/'         { Token _ (TokenSym '/') }
     '='         { Token _ (TokenSym '=') }
     '-'         { Token _ (TokenSym '-') }
     '+'         { Token _ (TokenSym '+') }
@@ -37,6 +38,8 @@ import Transaction
     ')'         { Token _ (TokenSym ')') }
     '['         { Token _ (TokenSym '[') }
     ']'         { Token _ (TokenSym ']') }
+    '{'         { Token _ (TokenSym '{') }
+    '}'         { Token _ (TokenSym '}') }
     param       { Token _ (TokenKeyword "param") }
     fx          { Token _ (TokenKeyword "fx") }
     group       { Token _ (TokenKeyword "group") }
@@ -134,7 +137,7 @@ TransactionAttributeBuilders :: { [TransactionAttributeBuilder] }
 
 TransactionAttributeBuilder :: { TransactionAttributeBuilder }
     : Contragent { ContragentBuilder $1 }
-    | '(' Categories ')' { CategoryBuilder $ Category $ reverse $2 }
+    | '{' Categories '}' { CategoryBuilder $ Category $ reverse $2 }
     | '[' Tags ']' { TagsBuilder $ reverse $2 }
 
 Contragent :: { Contragent }
@@ -180,10 +183,25 @@ Money :: { Money }
     | MoneyWithCurrency { $1 }
 
 MoneyWithoutCurrency :: { Money }
-    : number { Sum $1 }
+    : ArithExpr { Sum $1 }
 
 MoneyWithCurrency :: { Money }
-    : number string { Money $1 $2 }
+    : ArithExpr string { Money $1 $2 }
+
+
+ArithExpr :: { Double }
+    : ArithExpr '+' ArithTerm { $1 + $3 }
+    | ArithExpr '-' ArithTerm { $1 - $3 }
+    | ArithTerm { $1 }
+
+ArithTerm :: { Double }
+    : ArithTerm '*' ArithFactor { $1 * $3 }
+    | ArithTerm '/' ArithFactor { $1 / $3 }
+    | ArithFactor { $1 }
+
+ArithFactor :: { Double }
+    : number { $1 }
+    | '(' ArithExpr ')' { $2 }
 
 
 MaybeTSides :: { Maybe [RawSide] }

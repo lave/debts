@@ -14,15 +14,15 @@ $quote = \"
 tokens :-
     $white+ ;
     "#".*   ;
-    [>:\,_\*=\-\+@\(\)\[\]]     { \p s -> Token p $ TokenSym $ head s }
-    "param"                     { \p s -> Token p $ TokenKeyword "param" }
-    "fx"                        { \p s -> Token p $ TokenKeyword "fx" }
-    "group"                     { \p s -> Token p $ TokenKeyword "group" }
-    "date"                      { \p s -> Token p $ TokenKeyword "date" }
-    "internal"                  { \p s -> Token p $ TokenKeyword "internal" }
-    "-"? $digit+ (\. $digit+)?  { \p s -> Token p $ TokenNumber $ read s }
-    $alpha [$alpha $digit _\.]* { \p s -> Token p $ TokenString s }
-    $quote [^$quote]* $quote    { \p s -> Token p $ TokenString $ trimBoth s }
+    [>:\,_\*\/=\-\+@\(\)\[\]\{\}] { \p s -> Token p $ TokenSym $ head s }
+    "param"                       { \p s -> Token p $ TokenKeyword "param" }
+    "fx"                          { \p s -> Token p $ TokenKeyword "fx" }
+    "group"                       { \p s -> Token p $ TokenKeyword "group" }
+    "date"                        { \p s -> Token p $ TokenKeyword "date" }
+    "internal"                    { \p s -> Token p $ TokenKeyword "internal" }
+    "-"? $digit+ (\. $digit+)?    { \p s -> Token p $ TokenNumber $ read s }
+    $alpha [$alpha $digit _\.]*   { \p s -> Token p $ TokenString s }
+    $quote [^$quote]* $quote      { \p s -> Token p $ TokenString $ trimBoth s }
 
 {
 
