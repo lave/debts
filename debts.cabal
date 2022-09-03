@@ -10,9 +10,9 @@ Cabal-Version:      >=1.10
 Executable debts
   Main-is:          Main.hs
   Build-Depends:    base, array, containers, MissingH
+  Build-Tools:      alex, happy
   Hs-Source-Dirs:   src
-  Other-Modules:    Lexer Parser
-  build-tools: alex, happy
+  Other-Modules:    Aggregation, Balance BasicTypes, CommandLine, CommonCalculationLog, Fx, InputBuilder, Lexer, Money, MoneyLog, Normalize, Param, Parser, ParserMonad, Postprocess, Preprocess, Print, PrintTable, Process, Result, Round, Side, SplitSide, Transaction, Utils
   Default-Language: Haskell98
 
 Test-Suite tests
@@ -20,5 +20,6 @@ Test-Suite tests
   Type:             exitcode-stdio-1.0
   Hs-Source-Dirs:   testsuite/tests src dist/build
   Build-Depends:    base, array, containers, HUnit, MissingH
-  Other-Modules:    Lexer Parser
+  Other-Modules:    Aggregation, Balance BasicTypes, CommandLine, CommonCalculationLog, Fx, InputBuilder, Lexer, Money, MoneyLog, Normalize, Param, Parser, ParserMonad, Postprocess, Preprocess, Print, PrintTable, Process, Result, Round, Side, SplitSide, Transaction, Utils,
+                    AggregationTest, BalanceTest, CommandLineTest, FxTest, LexerTest, MoneyLogTest, MoneyTest, NormalizeTest, ParamTest, ParserTest, PrintTableTest, RoundTest, UtilsTest
   Default-Language: Haskell98
