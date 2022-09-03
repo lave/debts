@@ -53,6 +53,12 @@ parseGroupsTest = test [
                     RawSideOverride $ RawSide "B",
                     RawSideOverride $ RawSideRemove "C"]]
         ~=? parseGroups "group g = A, B*2, C, =A*2, =B, =-C",
+    "group with side adds" ~:
+        Just [Group "g" [RawSide "A", RawSideWithFactor "B" 2, RawSide "C",
+                    RawSideAdd $ RawSideWithFactor "A" 2,
+                    RawSideAdd $ RawSide "B",
+                    RawSideAdd $ RawSideRemove "C"]]
+        ~=? parseGroups "group g = A, B*2, C, +A*2, +B, +-C",
     "group with money - error" ~:
         Nothing
         ~=? parseGroups "group g = A, B, C 1 EUR"

@@ -92,6 +92,7 @@ GroupSide :: { RawSide }
     | SideWithFactor { $1 }
     | SideRemove { $1 }
     | '=' GroupSide { RawSideOverride $2 }
+    | '+' GroupSide { RawSideAdd $2 }
 
 
 
@@ -215,6 +216,7 @@ TSide :: { RawSide }
     | SideWithMoney { $1 }
     | SideWithSummand { $1 }
     | '=' TSide { RawSideOverride $2 }
+    | '+' TSide { RawSideAdd $2 }
 
 Side :: { RawSide }
     : string { RawSide $1 }

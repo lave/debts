@@ -9,41 +9,70 @@ import Side
 import Transaction
 
 
+-- after expansion only possible sides are simple and with factor
 -- simply replace each group with sides it consists of:
 --
--- group 1 = a, b, c
--- a, d, 1, e -> a, d, a, b, c, e
+-- group G = a, -b, c*2, =d*3
+-- a, d, G,   e -> a, d, a,   -b, c*2, =d*3, e
+-- a, d, G*2, e -> a, d, a*2, -b, c*4, =d*6, e
 expandGroups :: [Group] -> [RawSide] -> [RawSide]
 expandGroups groups sides =
-    concat $ map expandGroup sides
+    processSides $ concat $ map expandGroup sides
     where
+        getGroup name = find (groupHasName name) groups
+        groupHasName n (Group name _) = n == name
+
+        -- simple group
         expandGroup side@(RawSide name) =
             getSides $ getGroup name
             where
-                getGroup name = find (groupHasName name) groups
-                groupHasName n (Group name _) = n == name
                 getSides Nothing = [side]
                 getSides (Just (Group _ sides')) = expandGroups groups sides'
+
+        -- group with factor
+        expandGroup side@(RawSideWithFactor name factor) =
+            getSides $ getGroup name
+            where
+                getSides Nothing = [side]
+                getSides (Just (Group _ sides')) = map applyFactor $ expandGroups groups sides'
+
+                applyFactor (RawSide name) = RawSideWithFactor name factor
+                applyFactor (RawSideWithFactor name factor_) = RawSideWithFactor name (factor * factor_)
+
+        -- remove group
+        expandGroup side@(RawSideRemove name) =
+            getSides $ getGroup name
+            where
+                getSides Nothing = [side]
+                getSides (Just (Group _ sides')) = map (\s -> RawSideRemove $ getName s) $ expandGroups groups sides'
+
+        -- override group
+        expandGroup side@(RawSideOverride side') =
+            map RawSideOverride $ expandGroup side'
+
+        -- add group
+        expandGroup side@(RawSideAdd side') =
+            map RawSideAdd $ expandGroup side'
+
+        -- this side is not supported for groups
         expandGroup side = [side]
 
 
 -- perform side operations - remove or override sides, check that every side is included only once
 processSides :: [RawSide] -> [RawSide]
-processSides sides =
-    reverse $ foldl processSideOperations [] sides
+processSides sides_ =
+    reverse $ foldl processSideOperations [] sides_
     where
         processSideOperations sides (RawSideRemove name) =
             filter (\s -> getName s /= name) sides
         processSideOperations sides (RawSideOverride side) =
             side : filter (\s -> getName s /= getName side) sides
+        processSideOperations sides (RawSideAdd side) =
+            side : sides
         processSideOperations sides side
             | find (\s -> haveSameName s side) sides == Nothing = side : sides
-            | otherwise = error ("Side witn name " ++ (getName side) ++ " already exist in the list")
+            | otherwise = error ("Side witn name " ++ (getName side) ++ " already exist in the list: " ++ (show sides_))
         haveSameName s1 s2 = getName s1 == getName s2
-        getName (RawSide n) = n
-        getName (RawSideWithFactor n _) = n
-        getName (RawSideWithMoney n _) = n
-        
 
 
 -- determine effective sum and split it between sides according to factors, summands etc
@@ -90,5 +119,5 @@ normalizeTransaction groups (Transaction payers beneficators sum date contragent
     Transaction payers' beneficators' (Just sum') date contragent category tags comment
     where
         (sum', payers', beneficators') = normalizeSides sum
-            (processSides $ expandGroups groups payers)
-            (processSides $ expandGroups groups beneficators)
+            (expandGroups groups payers)
+            (expandGroups groups beneficators)

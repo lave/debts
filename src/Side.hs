@@ -7,11 +7,12 @@ import Money
 
 data RawSide =
       RawSide String
-    | RawSideRemove String
     | RawSideWithFactor String Double
     | RawSideWithMoney String Moneys
     | RawSideWithSummand String Moneys
+    | RawSideRemove String
     | RawSideOverride RawSide
+    | RawSideAdd RawSide
     deriving (Show, Eq)
 
 
