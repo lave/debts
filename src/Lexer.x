@@ -49,4 +49,3 @@ token_position (Token p _) = p
 token_data (Token _ d) = d
 
 }
-

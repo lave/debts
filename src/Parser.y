@@ -50,6 +50,9 @@ import Transaction
 
 %monad {ParserError} {thenE} {returnE}
 
+%left '+' '-'
+%left '*' '/'
+
 %%
 
 All :: { ([Builder]) }
@@ -71,7 +74,7 @@ Builder :: { Builder }
 ParameterBuilder :: { Builder }
     : param string '=' string
         { ParameterBuilder ($2, $4) }
-    | param string '=' number
+    | param string '=' NumericExp
         { ParameterBuilder ($2, show $4) }
 
 
@@ -183,25 +186,18 @@ Money :: { Money }
     | MoneyWithCurrency { $1 }
 
 MoneyWithoutCurrency :: { Money }
-    : ArithExpr { Sum $1 }
+    : NumericExp { Sum $1 }
 
 MoneyWithCurrency :: { Money }
-    : ArithExpr string { Money $1 $2 }
+    : NumericExp string { Money $1 $2 }
 
-
-ArithExpr :: { Double }
-    : ArithExpr '+' ArithTerm { $1 + $3 }
-    | ArithExpr '-' ArithTerm { $1 - $3 }
-    | ArithTerm { $1 }
-
-ArithTerm :: { Double }
-    : ArithTerm '*' ArithFactor { $1 * $3 }
-    | ArithTerm '/' ArithFactor { $1 / $3 }
-    | ArithFactor { $1 }
-
-ArithFactor :: { Double }
+NumericExp :: { Double }
     : number { $1 }
-    | '(' ArithExpr ')' { $2 }
+    | '(' NumericExp ')' { $2 }
+    | NumericExp '+' NumericExp { $1 + $3 }
+    | NumericExp '-' NumericExp { $1 - $3 }
+    | NumericExp '*' NumericExp { $1 * $3 }
+    | NumericExp '/' NumericExp { $1 / $3 }
 
 
 MaybeTSides :: { Maybe [RawSide] }
@@ -227,13 +223,14 @@ SideRemove :: { RawSide }
     : '-' string { RawSideRemove $2 }
 
 SideWithFactor :: { RawSide }
-    : string '*' number { RawSideWithFactor $1 $3 }
+    : string '*' NumericExp { RawSideWithFactor $1 $3 }
 
 SideWithMoney :: { RawSide }
     : string Moneys { RawSideWithMoney $1 $2 }
 
 SideWithSummand :: { RawSide }
     : string '+' Moneys { RawSideWithSummand $1 $3 }
+
 
 {
 parseError :: [Token] -> ParserError a

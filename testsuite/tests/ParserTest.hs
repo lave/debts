@@ -30,7 +30,10 @@ parseParametersTest = test [
 
     "number parameter" ~:
         Just [("s", "1.3")]
-        ~=? parseParameters "param s=1.3"
+        ~=? parseParameters "param s=1.3",
+    "number parameter with arithmetics" ~:
+        Just [("s", "17.5")]
+        ~=? parseParameters "param s=2 + 4*5 - (3+6)/2"
     ]
 
 
@@ -58,11 +61,11 @@ parseGroupsTest = test [
 
 parseFxesTest = test [
     "srtaight fx" ~:
-        Just [Fx (Money 1 "USD") (Money 30 "RUB")]
-        ~=? parseFxes "fx 1 USD = 30 RUB",
+        Just [Fx (Money 1 "USD") (Money 30 "RUR")]
+        ~=? parseFxes "fx 1 USD = 30 RUR",
     "complex fx" ~:
-        Just [Fx (Money 10 "USD") (Money 300 "RUB")]
-        ~=? parseFxes "fx 10 USD = 300 RUB"
+        Just [Fx (Money 10 "USD") (Money 300 "RUR")]
+        ~=? parseFxes "fx 10 USD = 300 RUR"
     ]
 
 
@@ -99,7 +102,7 @@ parseMoneysTest = test [
         Just (Moneys [Money 150 "USD"])
         ~=? parseMoneys "(10 + 20) * 5 USD",
     "sum with expression and multiple currencies" ~:
-        Just (Moneys [Money 30 "USD", Sum 46, Money 20 "RUB"])
+        Just (Moneys [Money 30 "USD", Sum 46, Money 25 "RUB"])
         ~=? parseMoneys "10 + 20 USD 5 * 10 - 4 30 / 2 + 10 RUB",
 
     -- errors
@@ -137,6 +140,13 @@ parseTransactionsTest = test [
     "auto sum and beneficators" ~:
         Just [transaction { beneficators = payers transaction, Transaction.sum = Nothing }]
         ~=? parseTransactions "A > _ > _",
+
+    "sum with currency" ~:
+        Just [transaction { Transaction.sum = Just $ Moneys [Money 50 "EUR"] }]
+        ~=? parseTransactions "A > 50 EUR > B",
+    "sum with several currencies" ~:
+        Just [transaction { Transaction.sum = Just $ Moneys [Money 100 "USD", Sum 10, Money 50 "EUR"] }]
+        ~=? parseTransactions "A > 50 EUR 10 100 USD > B",
 
     "minus side" ~:
         Just [transaction { payers = [RawSideRemove "A"] }]
@@ -307,6 +317,6 @@ tests = test [
     parseParametersTest,
     parseGroupsTest,
     parseFxesTest,
-    --parseMoneysTest,
+    parseMoneysTest,
     parseTransactionsTest
     ]
