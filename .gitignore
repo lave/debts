@@ -1,4 +1,5 @@
 cabal.project.local
+debts
 dist
 dist-newstyle
 *.sw[pon]

@@ -5,6 +5,7 @@ import Data.Maybe
 
 import Aggregation
 import Fx
+import Money
 import Normalize
 import Round
 import Side
@@ -35,6 +36,25 @@ splitGroups params transactions
     | getBoolParam params "split" = map split transactions
     | otherwise = transactions
     
+
+assignDefaultCurrency :: Params -> Transactions -> Transactions
+assignDefaultCurrency params transactions
+    | isNothing currency = transactions
+    | otherwise = map convertTransaction transactions
+    where
+        currency = getStringParam params "default.currency"
+        convertTransaction t = t {
+            payers = map convertSide $ payers t,
+            beneficators = map convertSide $ beneficators t,
+            Transaction.sum = fmap convertMoneys $ Transaction.sum t
+        }
+
+        convertSide (Side name moneys) =
+            Side name $ convertMoneys moneys
+        convertMoneys (Moneys moneys) =
+            Moneys $ map convertMoney moneys
+        convertMoney (Sum q) = Money q $ fromJust currency
+        convertMoney m = m
 
 convert :: Params -> Fxs -> Transactions -> Transactions
 convert params fxs transactions
