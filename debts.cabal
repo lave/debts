@@ -12,7 +12,7 @@ Executable debts
   Build-Depends:    base, array, containers, MissingH
   Build-Tools:      alex, happy
   Hs-Source-Dirs:   src
-  Other-Modules:    Aggregation, Balance BasicTypes, CommandLine, CommonCalculationLog, Fx, InputBuilder, Lexer, Money, MoneyLog, Normalize, Param, Parser, ParserMonad, Postprocess, Preprocess, Print, PrintTable, Process, Result, Round, Side, SplitSide, Transaction, Utils
+  Other-Modules:    Aggregation, Balance BasicTypes, CommandLine, CommonCalculationLog, Fx, InputBuilder, Lexer, Money, MoneyLog, Normalize, Param, Parser, ParserMonad, Postprocess, Preprocess, Print, PrintTable, Process, Result, Round, Side, SplitSide, SpendingsBy, Transaction, Utils
   Default-Language: Haskell98
 
 Test-Suite tests
@@ -20,6 +20,6 @@ Test-Suite tests
   Type:             exitcode-stdio-1.0
   Hs-Source-Dirs:   testsuite/tests src dist/build
   Build-Depends:    base, array, containers, HUnit, MissingH
-  Other-Modules:    Aggregation, Balance BasicTypes, CommandLine, CommonCalculationLog, Fx, InputBuilder, Lexer, Money, MoneyLog, Normalize, Param, Parser, ParserMonad, Postprocess, Preprocess, Print, PrintTable, Process, Result, Round, Side, SplitSide, Transaction, Utils,
+  Other-Modules:    Aggregation, Balance BasicTypes, CommandLine, CommonCalculationLog, Fx, InputBuilder, Lexer, Money, MoneyLog, Normalize, Param, Parser, ParserMonad, Postprocess, Preprocess, Print, PrintTable, Process, Result, Round, Side, SplitSide, SpendingsBy, Transaction, Utils
                     AggregationTest, BalanceTest, CommandLineTest, FxTest, LexerTest, MoneyLogTest, MoneyTest, NormalizeTest, ParamTest, ParserTest, PreprocessTest, PrintTableTest, RoundTest, UtilsTest, TestUtils
   Default-Language: Haskell98

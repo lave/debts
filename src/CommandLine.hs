@@ -46,7 +46,10 @@ cmdOptionDescriptors = [
         "print log of calculating balance",
     Option "" ["ml"]
         (ReqArg (\arg opt -> opt { optMoneyLog = Just arg }) "participant name")
-        "generate files for importing into AceMoney"
+        "generate files for importing into AceMoney",
+    Option "C" ["by-cat"]
+        (OptArg (\arg opt -> opt { optSpendingByCategory = Just $ fmap (read :: String -> Int) arg }) "depth")
+        "print spendings by category"
     ]
 
 

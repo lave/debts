@@ -78,4 +78,5 @@ process mode paramOverrides (Input rawParams groups fxs transactions) =
 determineMode options
     | CommandLine.optLog options = Process.CommonCalculationLog
     | Just name <- CommandLine.optMoneyLog options = Process.MoneyLog name
+    | Just depth <- CommandLine.optSpendingByCategory options = Process.SpendingsByCategory depth
     | otherwise = Process.Balance

@@ -1,6 +1,8 @@
 module BasicTypes
 where
 
+import Data.String.Utils
+
 --  side/account name
 type Name = String
 
@@ -19,7 +21,11 @@ data Contragent =
 --  category of transaction
 type CategoryComponent = String
 newtype Category = Category [CategoryComponent]
-    deriving (Show, Eq)
+    deriving (Eq)
+
+instance Show Category where
+    show (Category components) = join "." components
+
 
 newtype Tag = Tag String
     deriving (Show, Eq)

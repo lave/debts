@@ -103,3 +103,23 @@ printResults (MoneyLog name logs) = do
                         prependIf :: Bool -> String -> String -> String
                         prependIf False _ string = string
                         prependIf True prefix string = prefix ++ string
+
+printResults (SpendingsBy spendings) = do
+    putLines $ toStrings " | " makeTable
+
+    where
+        makeTable = tableBuilder
+            |> addHeader ("Category" : allNames)
+            |> addSeparator
+            |> setGlobalAlign AlignRight
+            |> setAlign 0 AlignLeft
+            |> addRows (map toRow spendings)
+            |> addSeparator
+            -- |> addRow (toRow ("Total", Money.sum balance, Money.sum expenses))
+            |> build
+
+        allNames = map fst $ snd $ head spendings
+
+        toRow :: (Name, [(Name, Moneys)]) -> [String]
+        toRow (cat, sides) =
+            cat : (map (show . snd) sides)

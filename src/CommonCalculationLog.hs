@@ -32,13 +32,11 @@ log transactions =
                     | null name = "n/a"
                     | otherwise = name
                     where
-                        name = date' ++ contragent' ++ category' ++ comment'
+                        name = date' ++ contragent' ++ category'' ++ comment'
                         date' = maybe "" (\(Date d) -> d ++ ": ") $ date t
                         contragent' = maybe "" ((++ ", ") . getContragent) $ contragent t
-                        Category categories = category t
-                        category' = if null categories
-                            then ""
-                            else (join "." $ categories) ++ ": "
+                        category' = show $ category t
+                        category'' = if null category' then "" else category' ++ ": "
                         comment' = maybe "" (\(Comment c) -> c) $ comment t
 
                         getContragent Internal = "internal"

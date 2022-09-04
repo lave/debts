@@ -11,6 +11,7 @@ data Result =
       Balance [(Name, Moneys, Moneys)]
     | CommonCalculationLog [Name] [CommonCalculationLogEntry]
     | MoneyLog Name [(Name, [MLTransaction])]
+    | SpendingsBy [(Name, [(Name, Moneys)])]
     deriving (Eq, Show)
 
 --  name, sides (expenses, benefit, balance)

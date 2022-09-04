@@ -10,6 +10,7 @@ import Money
 import MoneyLog
 import qualified Result
 import Side
+import SpendingsBy
 import Transaction
 
 
@@ -18,6 +19,7 @@ data Operation =
     | CommonCalculationLog
     | CalculationLog
     | MoneyLog Name
+    | SpendingsByCategory (Maybe Int)
 
 
 process :: Operation -> Transactions -> Result.Result
@@ -37,6 +39,13 @@ process CommonCalculationLog transactions =
 
 process (MoneyLog name) transactions =
     MoneyLog.log name transactions
+
+process (SpendingsByCategory depth) transactions =
+    spendingsBy allCategories (\c t -> c == (truncCat depth $ category t)) transactions
+    where
+        allCategories = List.nub $ map ((truncCat depth) . category) transactions
+        truncCat Nothing category = category
+        truncCat (Just d) (Category cs) = Category (take d cs)
 
 
 outerJoin :: Ord a => [a] -> [a] -> (a -> a -> b) -> (a -> b) -> (a -> b) -> [b]

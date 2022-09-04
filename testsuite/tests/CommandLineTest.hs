@@ -18,7 +18,11 @@ optionsTest = test [
     "log" ~:
         True ~=? (optLog $ options $ getOptions ["-l"]),
     "money log" ~:
-        Just "Eric" ~=? (optMoneyLog $ options $ getOptions ["--ml", "Eric"])
+        Just "Eric" ~=? (optMoneyLog $ options $ getOptions ["--ml", "Eric"]),
+    "spending by category" ~:
+        Just Nothing ~=? (optSpendingByCategory $ options $ getOptions ["--by-cat"]),
+    "spending by category with limit" ~:
+        Just (Just 2) ~=? (optSpendingByCategory $ options $ getOptions ["--by-cat=2"])
     ]
 
 filesTest = test [
