@@ -4,6 +4,7 @@ module Main (main)
 where
 
 import qualified System.Environment (getArgs)
+import qualified System.Exit
 import Control.Monad
 
 import qualified CommandLine
@@ -30,10 +31,17 @@ parameterDescriptors = [
 
 main = do
     args <- System.Environment.getArgs
-    let fileName = head args
-    let isVerbose = CommandLine.containsKey args "-v"
-    let parameters = CommandLine.findParameters args
-    let mode = determineMode args
+    let (options, files, errors) = CommandLine.getOptions args
+
+    when (errors /= []) $ mapM_ putStrLn errors >> System.Exit.exitFailure
+
+    let isHelp = CommandLine.optHelp options
+    when isHelp $ putStrLn CommandLine.getUsageInfo
+
+    let isVerbose = CommandLine.optVerbose options
+    let parameters = CommandLine.optParams options
+    let mode = determineMode options
+    let fileName = head files
 
     s <- readFile fileName
     let tokens = alexScanTokens s
@@ -54,10 +62,10 @@ process mode paramOverrides (Input rawParams groups fxs transactions) =
 
         preprocessed = transactions
             |> Preprocess.normalize groups
+            |> Preprocess.assignDefaultCurrency params
             |> Preprocess.filter params
             |> Preprocess.aggregate params
             |> Preprocess.splitGroups params
-            |> Preprocess.assignDefaultCurrency params
             |> Preprocess.convert params fxs 
 
         processed = preprocessed
@@ -67,8 +75,7 @@ process mode paramOverrides (Input rawParams groups fxs transactions) =
             |> Postprocess.round params
 
 
-determineMode args
-    | CommandLine.containsKey args "--log" = Process.CommonCalculationLog
-    | Just name <- CommandLine.getKey args "--ml" = Process.MoneyLog name
+determineMode options
+    | CommandLine.optLog options = Process.CommonCalculationLog
+    | Just name <- CommandLine.optMoneyLog options = Process.MoneyLog name
     | otherwise = Process.Balance
-

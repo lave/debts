@@ -2,37 +2,52 @@ module CommandLine
 where
 
 import Data.Maybe
-import qualified Data.List as List
+import System.Console.GetOpt
 
 import Param
+import Utils
 
 
-type Arguments = [String]
+data Options = Options {
+    optHelp :: Bool,
+    optVerbose :: Bool,
+    optParams :: [RawParam],
+    optBalance :: Bool,
+    optLog :: Bool,
+    optMoneyLog :: Maybe String,
+    optSpendingByCategory :: Maybe (Maybe Int)
+    } deriving (Show)
 
+startOptions = Options {
+    optHelp = False,
+    optVerbose = False,
+    optParams = [],
+    optBalance = False,
+    optLog = False,
+    optMoneyLog = Nothing,
+    optSpendingByCategory = Nothing
+    }
 
-containsKey :: Arguments -> String -> Bool
-containsKey args name =
-    List.find (== name) args /= Nothing
-
-getKey :: Arguments -> String -> Maybe String
-getKey args name
-    | keyIndex == Nothing = Nothing
-    | fromJust keyIndex + 1 == length args = Nothing
-    | otherwise = Just $ args !! ((fromJust keyIndex) + 1)
-    where
-        keyIndex = List.elemIndex name args
-    
-
-
-findParameters :: Arguments -> [RawParam]
-findParameters s =
-    map (parseParameter . drop 2) (filter isParameter s)
-    where
-        isParameter s = and [
-            length s > 2,
-            List.isPrefixOf "-D" s,
-            not $ List.isPrefixOf "-D=" s]
-        parseParameter = splitBy (== '=')
+cmdOptionDescriptors = [
+    Option "h" ["help"]
+        (NoArg (\opt -> opt { optHelp = True }))
+        "print help",
+    Option "v" ["verbose"]
+        (NoArg (\opt -> opt { optVerbose = True }))
+        "be verbose",
+    Option "D" []
+        (ReqArg (\arg opt -> opt { optParams = (splitBy (== '=') arg) : (optParams opt) }) "parameter")
+        "define calculation parameter",
+    Option "b" ["balance"]
+        (NoArg (\opt -> opt { optBalance = True }))
+        "calculate balance (default)",
+    Option "l" ["log"]
+        (NoArg (\opt -> opt { optLog = True }))
+        "print log of calculating balance",
+    Option "" ["ml"]
+        (ReqArg (\arg opt -> opt { optMoneyLog = Just arg }) "participant name")
+        "generate files for importing into AceMoney"
+    ]
 
 
 splitBy predicate [] = ([], [])
@@ -40,3 +55,10 @@ splitBy predicate (x : xs)
     | predicate x = ([], xs)
     | otherwise = (x : fst, snd)
         where (fst, snd) = splitBy predicate xs
+
+getOptions args = (options, files, errors)
+    where
+        (optionActions, files, errors) = getOpt Permute cmdOptionDescriptors args
+        options = foldl (|>) startOptions optionActions
+
+getUsageInfo = usageInfo "Usage: debts FILE [OPTION...]" cmdOptionDescriptors
