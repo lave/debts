@@ -55,9 +55,11 @@ printResults (CommonCalculationLog names log) = do
             (map (printSide verbose) sides) ++ [name]
 
         printSide verbose (expenses, benefit, balance) =
-            if verbose
-                then (show expenses) ++ " - " ++ (show benefit) ++ " = " ++ (show balance)
-                else show balance
+            if empty expenses && empty benefit
+                then ""
+                else if verbose
+                    then (show expenses) ++ " - " ++ (show benefit) ++ " = " ++ (show balance)
+                    else show balance
 
         totals :: [CommonCalculationLogEntry] -> [(Moneys, Moneys, Moneys)]
         totals log = foldl
@@ -115,11 +117,18 @@ printResults (SpendingsBy spendings) = do
             |> setAlign 0 AlignLeft
             |> addRows (map toRow spendings)
             |> addSeparator
-            -- |> addRow (toRow ("Total", Money.sum balance, Money.sum expenses))
+            |> addRow (toRow $ totals spendings)
             |> build
 
         allNames = map fst $ snd $ head spendings
 
         toRow :: (Name, [(Name, Moneys)]) -> [String]
         toRow (cat, sides) =
-            cat : (map (show . snd) sides)
+            cat : (map ((showMoneys "") . snd) sides)
+
+        totals :: [(Name, [(Name, Moneys)])] -> (Name, [(Name, Moneys)])
+        totals spendings = ("Total", map (\m -> ("", m)) $ foldl (\r sides -> zipWith add r (map snd sides)) (repeat $ Moneys []) (map snd spendings))
+
+showMoneys emptyString moneys
+    | empty moneys = emptyString
+    | otherwise = show moneys
