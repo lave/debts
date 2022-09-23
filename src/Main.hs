@@ -8,6 +8,7 @@ import qualified System.Exit
 import Control.Monad
 
 import qualified CommandLine
+import qualified Fx
 import InputBuilder
 import Param
 import Parser
@@ -55,10 +56,10 @@ main = do
             putStrLn ("Parse error:" ++ s)
 
 
-process mode paramOverrides (Input rawParams groups fxs transactions) =
-    postprocessed
+process mode paramOverrides (Input rawParams groups fxs transactions) = postprocessed
     where
         params = makeParams parameterDescriptors $ rawParams ++ paramOverrides
+        fxs_ = Fx.make fxs
 
         preprocessed = transactions
             |> Preprocess.normalize groups
@@ -66,7 +67,7 @@ process mode paramOverrides (Input rawParams groups fxs transactions) =
             |> Preprocess.filter params
             |> Preprocess.aggregate params
             |> Preprocess.splitGroups params
-            |> Preprocess.convert params fxs 
+            |> Preprocess.convert params fxs_
 
         processed = preprocessed
             |> Process.process mode

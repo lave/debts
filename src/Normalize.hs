@@ -71,7 +71,7 @@ processSides sides_ =
             side : sides
         processSideOperations sides side
             | find (\s -> haveSameName s side) sides == Nothing = side : sides
-            | otherwise = error ("Side witn name " ++ (getName side) ++ " already exist in the list: " ++ (show sides_))
+            | otherwise = error $ "Side witn name " ++ (getName side) ++ " already exist in the list: " ++ (show sides_)
         haveSameName s1 s2 = getName s1 == getName s2
 
 
