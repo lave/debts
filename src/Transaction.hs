@@ -51,3 +51,5 @@ getMoneyFor name sides
     where
         found = List.find (\(Side n _) -> n == name) sides
         Side _ moneys = fromJust found
+
+isInternal transaction = contragent transaction == Just Internal

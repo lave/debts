@@ -41,9 +41,10 @@ process (MoneyLog name) transactions =
     MoneyLog.log name transactions
 
 process (SpendingsByCategory depth) transactions =
-    spendingsBy allCategories (\c t -> c == (truncCat depth $ category t)) transactions
+    spendingsBy allCategories (\c t -> c == (truncCat depth $ category t)) transactions'
     where
-        allCategories = List.nub $ map ((truncCat depth) . category) transactions
+        transactions' = filter (not . isInternal) transactions
+        allCategories = List.nub $ map ((truncCat depth) . category) transactions'
         truncCat Nothing category = category
         truncCat (Just d) (Category cs) = Category (take d cs)
 

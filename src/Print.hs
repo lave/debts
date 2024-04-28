@@ -108,7 +108,6 @@ printResults (MoneyLog name logs) = do
 
 printResults (SpendingsBy spendings) = do
     putLines $ toStrings " | " makeTable
-
     where
         makeTable = tableBuilder
             |> addHeader ("Category" : allNames)

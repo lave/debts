@@ -24,8 +24,6 @@ balance' sides transaction =
 expenses' sides transaction
     | isInternal transaction = sides
     | otherwise = sides `addSides` (beneficators transaction)
-    where
-        isInternal transaction = contragent transaction == Just Internal
 
 
 addSides = combineSides add
