@@ -149,7 +149,7 @@ transaction payers beneficators = Transaction.Transaction
     (map makeSide payers)
     (map makeSide beneficators)
     (Just $ Moneys [Sum $ Prelude.sum $ snd $ unzip payers])
-    (Just $ Date "01.01.2000")
+    (Just $ StructDate 2000 1 1)
     (Just $ Contragent "contragent")
     (Category ["category"])
     [Tag "tag"]
@@ -165,7 +165,7 @@ mlt payer beneficator sum = MLTransaction
     payer
     beneficator
     (Moneys [Sum sum])
-    (Just $ Date "01.01.2000")
+    (Just $ StructDate 2000 1 1)
     (Just $ Contragent "contragent")
     (Category ["category"])
     [Tag "tag"]

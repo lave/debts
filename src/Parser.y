@@ -27,6 +27,7 @@ import Transaction
     '>'         { Token _ (TokenSym '>') }
     ':'         { Token _ (TokenSym ':') }
     '_'         { Token _ (TokenSym '_') }
+    '.'         { Token _ (TokenSym '.') }
     ','         { Token _ (TokenSym ',') }
     '*'         { Token _ (TokenSym '*') }
     '/'         { Token _ (TokenSym '/') }
@@ -46,7 +47,9 @@ import Transaction
     date        { Token _ (TokenKeyword "date") }
     internal    { Token _ (TokenKeyword "internal") }
     string      { Token _ (TokenString $$) }
+    integer     { Token _ (TokenInteger $$) }
     number      { Token _ (TokenNumber $$) }
+    date_l      { Token _ (TokenDate _ _ _) }
 
 %monad {ParserError} {thenE} {returnE}
 
@@ -104,7 +107,8 @@ FxBuilder :: { Builder }
 
 DateBuilder :: { Builder }
     : date '_' { DateBuilder Nothing }
-    | date string { DateBuilder $ Just $ Date $2 }
+    | date string { DateBuilder $ Just $ StringDate $2 }
+    | date date_l { DateBuilder $ Just $ (\(Token _ (TokenDate y m d)) -> makeDate y m d) $2 }
 
 
 
@@ -194,6 +198,7 @@ MoneyWithCurrency :: { Money }
 
 NumericExp :: { Double }
     : number { $1 }
+    | integer { fromIntegral $1 }
     | '(' NumericExp ')' { $2 }
     | NumericExp '+' NumericExp { $1 + $3 }
     | NumericExp '-' NumericExp { $1 - $3 }

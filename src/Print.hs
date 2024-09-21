@@ -87,7 +87,7 @@ printResults (MoneyLog name logs) = do
                     where
                         isTransfer = not $ isNothing $ beneficator t
                         account = fromJust $ beneficator t
-                        Date date' = fromMaybe (Date "") $ date t
+                        date' = maybe "" show $ date t
                         contragent' = getContragent $ contragent t
                         contragent'' = if isTransfer then account else contragent'
                         Category categories = category t

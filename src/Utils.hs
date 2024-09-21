@@ -1,5 +1,5 @@
 module Utils (
-    same,
+    trd, same,
     trimFirst, trimLast, trimBoth,
     contains, split, setNth,
     (|>)
@@ -9,12 +9,12 @@ where
 import Data.List
 import qualified Data.List.Utils (split)
 
+trd (_, _, x) = x
 
 same :: Eq a => [a] -> [a] -> Bool
 same l1 l2 =
     length l1 == length l2 &&
     length l1 == length (intersect l1 l2)
-
 
 trimFirst [] = []
 trimFirst l = tail l

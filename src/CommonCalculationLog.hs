@@ -33,7 +33,7 @@ log transactions =
                     | otherwise = name
                     where
                         name = date' ++ contragent' ++ category'' ++ comment'
-                        date' = maybe "" (\(Date d) -> d ++ ": ") $ date t
+                        date' = maybe "" (\d -> (show d) ++ ": ") $ date t
                         contragent' = maybe "" ((++ ", ") . getContragent) $ contragent t
                         category' = show $ category t
                         category'' = if null category' then "" else category' ++ ": "

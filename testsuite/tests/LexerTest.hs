@@ -15,10 +15,10 @@ parseTests = test [
         ~=? scan (unwords allowedKeywords),
 
     "numbers" ~:
-        [TokenNumber 0,
-         TokenNumber 0,
-         TokenNumber 12,
-         TokenNumber (-34),
+        [TokenInteger 0,
+         TokenInteger 0,
+         TokenInteger 12,
+         TokenInteger (-34),
          TokenNumber 0.0,
          TokenNumber 0.0,
          TokenNumber 12.3,
@@ -29,6 +29,15 @@ parseTests = test [
         [TokenString "abc",
          TokenString "def ghi"]
         ~=? scan "abc \"def ghi\"",
+
+    "dates" ~:
+        [TokenDate 2020 1 22,
+         TokenDate   21 2  3,
+         TokenDate 2022 3 24,
+         TokenDate   23 4  5,
+         TokenDate 2024 5 26
+        ]
+        ~=? scan "2020-01-22 2/3/21 03/24/2022 5.4.23 26.05.2024",
 
     "whitespaces" ~:
         [TokenString "a"]

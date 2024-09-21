@@ -2,13 +2,28 @@ module BasicTypes
 where
 
 import Data.String.Utils
+import Data.Time
+import Text.Printf
 
 --  side/account name
 type Name = String
 
 --  date
-data Date = Date String
-    deriving (Eq, Show)
+data Date =
+      StringDate String
+    | StructDate Int Int Int    -- year, month, day
+    deriving (Eq)
+
+instance Show Date where
+    show (StringDate str) = str
+    show (StructDate year month day) = (printf "%04d" year) ++ "-" ++ (printf "%02d" month) ++ "-" ++ (printf "%02d" day)
+
+makeDate year month day = StructDate year' month' day'
+    where
+        year' = if year < 100 then year + 2000 else year
+        month' = if month < 1 || month > 12 then error ("Wrong month: " ++ show month) else month
+        day' = if month < 1 || month > 31 then error ("Wrong day: " ++ show day) else day
+    
 
 --  contragent - who ultimately gets the money, e.g. a shop.
 --  'Internal' means that transaction is just transfer of money

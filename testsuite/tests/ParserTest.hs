@@ -258,9 +258,9 @@ parseTransactionsTest = test [
     "with dates" ~:
         Just [
             transaction { comment = Just $ Comment "a", date = Nothing },
-            transaction { comment = Just $ Comment "b", date = Just $ Date "23.05.12" },
-            transaction { comment = Just $ Comment "c", date = Just $ Date "23.05.12" },
-            transaction { comment = Just $ Comment "d", date = Just $ Date "25.05.12" },
+            transaction { comment = Just $ Comment "b", date = Just $ StringDate "23.05.12" },
+            transaction { comment = Just $ Comment "c", date = Just $ StringDate "23.05.12" },
+            transaction { comment = Just $ Comment "d", date = Just $ StringDate "25.05.12" },
             transaction { comment = Just $ Comment "e", date = Nothing }]
         ~=? parseTransactions
                ("A > 50 > B : a"
@@ -274,17 +274,17 @@ parseTransactionsTest = test [
     
     "with dates - different formats" ~:
         Just [
-            transaction { date = Just $ Date "23.05.12" },
-            transaction { date = Just $ Date "23.05.2012" },
-            transaction { date = Just $ Date "23/05/12" },
-            transaction { date = Just $ Date "23/05/2012" },
-            transaction { date = Just $ Date "2012-05-03" }]
-        ~=? parseTransactions
-               ("date \"23.05.12\" A > 50 > B"
-            +++ "date \"23.05.2012\" A > 50 > B"
-            +++ "date \"23/05/12\" A > 50 > B"
-            +++ "date \"23/05/2012\" A > 50 > B"
-            +++ "date \"2012-05-03\" A > 50 > B")
+            transaction { date = Just $ StructDate 2020 1 22 },
+            transaction { date = Just $ StructDate 2021 2  3 },
+            transaction { date = Just $ StructDate 2022 3 24 },
+            transaction { date = Just $ StructDate 2023 4  5 },
+            transaction { date = Just $ StructDate 2024 5 26 }]
+        ~=? parseTransactions (
+               ("date 2020-01-22 A > 50 > B"
+            +++ "date     2/3/21 A > 50 > B"
+            +++ "date 03/24/2022 A > 50 > B"
+            +++ "date     5.4.23 A > 50 > B")
+            +++ "date 26.05.2024 A > 50 > B")
     ]
     where
         transaction = Transaction
