@@ -27,7 +27,6 @@ import Transaction
     '>'         { Token _ (TokenSym '>') }
     ':'         { Token _ (TokenSym ':') }
     '_'         { Token _ (TokenSym '_') }
-    '.'         { Token _ (TokenSym '.') }
     ','         { Token _ (TokenSym ',') }
     '*'         { Token _ (TokenSym '*') }
     '/'         { Token _ (TokenSym '/') }
@@ -53,6 +52,7 @@ import Transaction
 
 %monad {ParserError} {thenE} {returnE}
 
+%nonassoc FACTOR
 %left '+' '-'
 %left '*' '/'
 
@@ -230,7 +230,7 @@ SideRemove :: { RawSide }
     : '-' string { RawSideRemove $2 }
 
 SideWithFactor :: { RawSide }
-    : string '*' NumericExp { RawSideWithFactor $1 $3 }
+    : string '*' NumericExp %prec FACTOR { RawSideWithFactor $1 $3 }
 
 SideWithMoney :: { RawSide }
     : string Moneys { RawSideWithMoney $1 $2 }

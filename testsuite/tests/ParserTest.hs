@@ -160,6 +160,9 @@ parseTransactionsTest = test [
     "side with factor" ~:
         Just [transaction { payers = [RawSideWithFactor "A" 2] }]
         ~=? parseTransactions "A * 2 > 50 > B",
+    "side with factor arithmetics" ~:
+        Just [transaction { payers = [RawSideWithFactor "A" 8] }]
+        ~=? parseTransactions "A * 2+3*2 > 50 > B",
     "side with money" ~:
         Just [transaction { payers = [RawSideWithMoney "A" $ Moneys [Sum 50]] }]
         ~=? parseTransactions "A 50 > 50 > B",
