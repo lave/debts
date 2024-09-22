@@ -204,6 +204,7 @@ NumericExp :: { Double }
     | NumericExp '-' NumericExp { $1 - $3 }
     | NumericExp '*' NumericExp { $1 * $3 }
     | NumericExp '/' NumericExp { $1 / $3 }
+    | NumericExp '/' string '/' { $1 }
 
 
 MaybeTSides :: { Maybe [RawSide] }
