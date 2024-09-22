@@ -8,7 +8,8 @@ import Utils
 %wrapper "posn"
 
 $d = 0-9
-$a = [a-zA-Z]
+-- english and russian letters
+$a = [a-zA-Z\x0410-\x042F\x0430-\x044F\x0401\x0451]
 $q = \"
 
 tokens :-
