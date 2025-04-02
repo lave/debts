@@ -3,9 +3,10 @@
 module Main (main)
 where
 
+import Control.Monad
+import qualified Data.Map as Map
 import qualified System.Environment (getArgs)
 import qualified System.Exit
-import Control.Monad
 
 import qualified CommandLine
 import qualified Fx
@@ -60,9 +61,10 @@ process mode paramOverrides (Input rawParams groups fxs transactions) = postproc
     where
         params = makeParams parameterDescriptors $ rawParams ++ paramOverrides
         fxs_ = Fx.make fxs
+        groups_ = Map.fromList $ map (\(Group name side) -> (name, side)) groups
 
         preprocessed = transactions
-            |> Preprocess.normalize groups
+            |> Preprocess.normalize groups_
             |> Preprocess.assignDefaultCurrency params
             |> Preprocess.filter params
             |> Preprocess.aggregate params

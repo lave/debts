@@ -2,6 +2,7 @@ module Preprocess
 where
 
 import Data.Maybe
+import Data.Map (Map)
 
 import Aggregation
 import Fx

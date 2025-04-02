@@ -55,6 +55,8 @@ import Transaction
 %nonassoc FACTOR
 %left '+' '-'
 %left '*' '/'
+%left SIDES1
+%left SIDES0
 
 %%
 
@@ -83,19 +85,29 @@ ParameterBuilder :: { Builder }
 
 
 GroupBuilder :: { Builder }
-    : group string '=' GroupSides
-        { GroupBuilder $ Group $2 (reverse $4) }
+    : group string '=' Side { GroupBuilder $ Group $2 $4 }
 
-GroupSides :: { [RawSide] }
-    : GroupSide { [$1] }
-    | GroupSides ',' GroupSide { $3 : $1 }
+    --: group string '=' GroupSides
+        --{ GroupBuilder $ Group $2 (reverse $4) }
 
-GroupSide :: { RawSide }
-    : Side { $1 }
-    | SideWithFactor { $1 }
-    | SideRemove { $1 }
-    | '=' GroupSide { RawSideOverride $2 }
-    | '+' GroupSide { RawSideAdd $2 }
+--GroupSides :: { [RawSide] }
+    --: GroupSide { [$1] }
+    --| GroupSides ',' GroupSide { $3 : $1 }
+
+--A, C        -> A*1/2, C*1/2
+--A*2, C      -> A*2/3, C*1/3
+--A+B, C      -> A*1/4, B*1/4, C*2
+--(A+B)*2, C  -> A*1/3, B*1/3, C*1/3
+--(A*2+B)*2, C-> A*4/9, B*2/9, C*1/3
+
+
+--GroupSide :: { RawSide }
+      --: TSide { $1 }
+    --: Side { $1 }
+    --| SideWithFactor { $1 }
+    --| SideRemove { $1 }
+    --| '=' GroupSide { RawSideOverride $2 }
+    --| '+' GroupSide { RawSideAdd $2 }
 
 
 
@@ -113,25 +125,25 @@ DateBuilder :: { Builder }
 
 
 TransactionBuilder :: { Builder }
-    : TSides '>' MaybeMoneys '>' MaybeTSides TransactionAttributeBuilders CommentBuilder
+    : TSide '>' MaybeMoneys '>' MaybeTSide TransactionAttributeBuilders CommentBuilder
         { TransactionBuilder
             (reverse $1)
             (reverse $ fromMaybe $1 $5)
             $3
             ($6 ++ $7) }
-    | TSides '>' TSides TransactionAttributeBuilders CommentBuilder
+    | TSide '>' TSide TransactionAttributeBuilders CommentBuilder
         { TransactionBuilder
             (reverse $1)
             (reverse $3)
             Nothing
             ($4 ++ $5) }
-    | TSides '>' MaybeMoneys TransactionAttributeBuilders CommentBuilder
+    | TSide '>' MaybeMoneys TransactionAttributeBuilders CommentBuilder
         { TransactionBuilder
             (reverse $1)
             (reverse $1)
             $3
             ($4 ++ $5) }
-    | TSides TransactionAttributeBuilders CommentBuilder
+    | TSide TransactionAttributeBuilders CommentBuilder
         { TransactionBuilder
             (reverse $1)
             (reverse $1)
@@ -207,37 +219,50 @@ NumericExp :: { Double }
     | NumericExp '/' string '/' { $1 }
 
 
-MaybeTSides :: { Maybe [RawSide] }
+MaybeTSide :: { Maybe RawSide }
     : '_' { Nothing }
-    | TSides { Just $1 }
+    | TSide { Just $1 }
 
-TSides :: { [RawSide] }
-    : TSide { [$1] }
-    | TSides ',' TSide { $3 : $1 }
+--TSides :: { [RawSide] }
+--    : Side { $1 }
+--    : TSide { [$1] }
+--    | TSides ',' TSide { $3 : $1 }
 
 TSide :: { RawSide }
     : Side { $1 }
-    | SideRemove { $1 }
-    | SideWithFactor { $1 }
-    | SideWithMoney { $1 }
-    | SideWithSummand { $1 }
-    | '=' TSide { RawSideOverride $2 }
-    | '+' TSide { RawSideAdd $2 }
+--    | SideRemove { $1 }
+--    | SideWithFactor { $1 }
+--    | SideWithMoney { $1 }
+--    | SideWithSummand { $1 }
+--    | '=' TSide { RawSideOverride $2 }
+--    | '+' TSide { RawSideAdd $2 }
 
 Side :: { RawSide }
     : string { RawSide $1 }
+    | '(' Side ')' { $2 }
+    | Side Moneys { RawSideWithMoney $1 $2 }
+    | Side '+' Moneys { RawSideWithSummand $1 $3 }
+    | Side '*' NumericExp %prec FACTOR { RawSideWithFactor $1 $3 }
+    | NumericExp '*' Side %prec FACTOR { RawSideWithFactor $3 $1 }
+    | Side '+' Side %prec SIDES0 { cdrSides $1 $3 }
+    | Side ',' Side %prec SIDES1 { cdrSides $1 $3 }
+    | '-' string { RawSideRemove $2 }
+    | '=' Side { RawSideOverride $2 }
+    | '+' Side { RawSideAdd $2 }
 
 SideRemove :: { RawSide }
     : '-' string { RawSideRemove $2 }
 
 SideWithFactor :: { RawSide }
-    : string '*' NumericExp %prec FACTOR { RawSideWithFactor $1 $3 }
+    : Side '*' NumericExp %prec FACTOR { RawSideWithFactor $1 $3 }
+    --  probably this is not needed (ability to write 2*A instead of A*2)
+    | NumericExp '*' Side %prec FACTOR { RawSideWithFactor $3 $1 }
 
 SideWithMoney :: { RawSide }
-    : string Moneys { RawSideWithMoney $1 $2 }
+    : Side Moneys { RawSideWithMoney $1 $2 }
 
 SideWithSummand :: { RawSide }
-    : string '+' Moneys { RawSideWithSummand $1 $3 }
+    : Side '+' Moneys { RawSideWithSummand $1 $3 }
 
 
 {

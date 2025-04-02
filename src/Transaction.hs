@@ -11,10 +11,21 @@ import Side
 import Utils
 
 
-data Transaction_ side = Transaction {
-    payers :: [side],
-    beneficators :: [side],
-    sum :: Maybe Moneys,
+data RawTransaction = RawTransaction {
+    rpayers :: RawSide,
+    rbeneficators :: RawSide,
+    rsum :: Maybe Moneys,
+    rdate :: Maybe Date,
+    rcontragent :: Maybe Contragent,
+    rcategory :: Category,
+    rtags :: Tags,
+    rcomment :: Maybe Comment
+} deriving (Show)
+
+data Transaction = Transaction {
+    payers :: [Side],
+    beneficators :: [Side],
+    sum :: Moneys,
     date :: Maybe Date,
     contragent :: Maybe Contragent,
     category :: Category,
@@ -23,13 +34,10 @@ data Transaction_ side = Transaction {
 } deriving (Show)
     
 
-type RawTransaction = Transaction_ RawSide
-type Transaction = Transaction_ Side
-
 type RawTransactions = [RawTransaction]
 type Transactions = [Transaction]
 
-data Group = Group String [RawSide]
+data Group = Group String RawSide
     deriving (Show, Eq)
 
 
