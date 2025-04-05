@@ -20,25 +20,25 @@ import Transaction
 --
 
 --  replace groups with their definitions
-expandGroups :: Map String RawSide -> RawSide -> RawSide
+expandGroups :: Map String RawSide -> RawSide -> MidSide
 expandGroups groups side = expandGroup side
     where
         -- simple group - the only place where real replacement happens
         expandGroup side@(RawSide name)
-            | isNothing group = side
+            | isNothing group = MidSide name
             | otherwise = expandGroup side'
             where
                 side' = Map.lookup name groups
 
-        expandGroup (RawSideWithMoney side moneys) = RawSideWithMoney (expandGroup side) moneys
-        expandGroup (RawSideWithFactor side factor) = RawSideWithFactor (expandGroup side) factor
-        expandGroup (RawSideWithSummand side summand) = RawSideWithSummand (expandGroup side) summand
-        expandGroup (RawSides sides) = RawSides $ processOps $ map expandGroup sides
-        expandGroup (RawSideRemove side) = RawSideRemove $ expandGroup side
-        expandGroup (RawSideOverride side) = RawSideOverride $ expandGroup side
-        expandGroup (RawSideAdd side) = RawSideAdd $ expandGroup side
+        expandGroup (RawSideWithMoney side moneys) = MidSideM (expandGroup side) 0 moneys
+        expandGroup (RawSideWithFactor side factor) = MidSideM (expandGroup side) factor (Moneys [])
+        expandGroup (RawSideWithSummand side summand) = MidSideM (expandGroup side) 1 summand
+        expandGroup (RawSides sides) = MidSides $ processOps $ map expandGroup sides
+        --expandGroup (RawSideRemove side) = RawSideRemove $ expandGroup side
+        --expandGroup (RawSideOverride side) = RawSideOverride $ expandGroup side
+        --expandGroup (RawSideAdd side) = RawSideAdd $ expandGroup side
 
-        processOps :: [RawSide] -> [RawSide]
+        processOps :: [RawSide] -> [MidSide]
         processOps sides = reverse $ foldl processOp [] sides
 
         processOp :: [RawSide] -> Side -> [RawSide]

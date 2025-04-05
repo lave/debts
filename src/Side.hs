@@ -19,6 +19,12 @@ data RawSide =
 cdrSides lhs (RawSides rhs) = RawSides $ lhs : rhs
 cdrSides lhs rhs = RawSides [lhs, rhs]
 
+data MidSide =
+      MidSide String
+    | MidSideM MidSide Double Moneys
+    | MidSizes [MidSize]
+    deriving (Show, Eq)
+
 data Side = Side Name Moneys
     deriving (Show, Eq)
 instance Ord Side where
