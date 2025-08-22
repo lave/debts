@@ -33,6 +33,7 @@ import Transaction
     '='         { Token _ (TokenSym '=') }
     '-'         { Token _ (TokenSym '-') }
     '+'         { Token _ (TokenSym '+') }
+    sq          { Token _ (TokenSym '\'') }
     '@'         { Token _ (TokenSym '@') }
     '('         { Token _ (TokenSym '(') }
     ')'         { Token _ (TokenSym ')') }
@@ -201,6 +202,7 @@ MoneyWithoutCurrency :: { Money }
 
 MoneyWithCurrency :: { Money }
     : NumericExp string { Money $1 $2 }
+    | NumericExp string sq { Money $1 $2 }
 
 NumericExp :: { Double }
     : number { $1 }
