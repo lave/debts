@@ -125,6 +125,12 @@ TransactionBuilder :: { Builder }
             (reverse $3)
             Nothing
             ($4 ++ $5) }
+    | TSides '>' '*' TSides TransactionAttributeBuilders CommentBuilder
+        { TransactionBuilder
+            (reverse $1)
+            (map toSideWithFactor $ reverse $4)
+            Nothing
+            ($5 ++ $6) }
     | TSides '>' MaybeMoneys TransactionAttributeBuilders CommentBuilder
         { TransactionBuilder
             (reverse $1)

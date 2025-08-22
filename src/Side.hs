@@ -40,3 +40,12 @@ getFactor (RawSideWithSummand _ _) = 1
 getMoney (RawSideWithMoney _ money) = money
 getMoney (RawSideWithSummand _ money) = money
 getMoney _ = Moneys []
+
+toSideWithFactor (RawSide name) = RawSideWithFactor name 1
+toSideWithFactor s@(RawSideWithFactor _ _) = s
+toSideWithFactor (RawSideWithMoney name moneys) = RawSideWithFactor name f
+    where
+        Moneys [Sum f] = moneys
+toSideWithFactor s@(RawSideRemove _) = s
+toSideWithFactor (RawSideOverride s) = RawSideOverride $ toSideWithFactor s
+toSideWithFactor (RawSideAdd s) = RawSideAdd $ toSideWithFactor s
